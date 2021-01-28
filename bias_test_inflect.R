@@ -1,11 +1,25 @@
 library(magrittr)
 library(tidyverse)
 library(ggplot2)
+library(ggpubr)
+
+
+
+quantile.date.or <- function(vec, prob){
+  if(class(vec) == "Date"){
+    num_vec = as.numeric(vec)
+    num_vec %>% quantile(prob = prob) %>% as.Date(origin = "1970-01-01")
+  } else {
+    vec %>% quantile(prob = prob)
+  }
+}
+
 
 # experiment_name = "posneg Inflect valid1param v2"
 # experiment_name = "posneg Inflect valid1param v3"
 # experiment_name = "posneg Inflect valid1param long"
-experiment_name = "posneg Inflect valid2param"
+# experiment_name = "posneg Inflect valid2param"
+experiment_name = "posneg Inflect validALLparam"
 
 # res <- read_csv(paste0("~/Pasteur/tars/output/TOY/BiasTest_TOY_", experiment_name, ".csv"))
 
@@ -31,7 +45,7 @@ for(i in 1:length(files)){
 }
 res = res_read
 # res <- rbind(res, res_read)
-res$beta1 %>% table
+res$`true:beta1` %>% table
 
 # res %>%  write_csv(paste0("~/Pasteur/tars/output/TOY/cat/seirRefresh_", experiment_name, ".csv" ))
 res %>%  write_csv(paste0("~/Pasteur/tars/output/TOY/cat/BiasTest_seirInflect_", experiment_name, ".csv" ))
@@ -42,15 +56,6 @@ res %>%  write_csv(paste0("~/Pasteur/tars/output/TOY/cat/BiasTest_seirInflect_",
 
 
 
-
-quantile.date.or <- function(vec, prob){
-  if(class(vec) == "Date"){
-    num_vec = as.numeric(vec)
-    num_vec %>% quantile(prob = prob) %>% as.Date(origin = "1970-01-01")
-  } else {
-    vec %>% quantile(prob = prob)
-  }
-}
 
 
 # experiment_name = "posneg Inflect valid1param v2"
@@ -111,8 +116,6 @@ for(e in c("beta1", "beta2", "beta_factor", "E_init", "t_init", "t_inflect")){
 }
 
 
-library(ggpubr)
-
 ggpubr::ggarrange(plotlist = pls)
 
 
@@ -160,3 +163,66 @@ for(i in 1:4){
 
 ggpubr::ggarrange(plotlist = double_pls)
 
+
+
+
+# ALL param
+
+experiment_name = "posneg Inflect validALLparam"
+
+res <- read_csv(paste0("~/Pasteur/tars/output/TOY/cat/BiasTest_seirInflect_", experiment_name, ".csv")) %>% 
+  mutate(across(contains("t_"), function(x) as.Date(x, origin = "1970-01-01")))
+
+
+
+
+
+
+res <- res %>% 
+  mutate(beta2 = beta1*beta_factor
+         , `start:beta2` = `start:beta1` * `start:beta_factor`
+         , `true:beta2` = `true:beta1` * `true:beta_factor`)
+
+
+
+e = "beta1"
+e = "beta2"
+e = "beta_factor"
+e = "E_init"
+e = "t_init"
+e = "t_inflect"
+
+
+
+upper_limits <- list(beta1 = c(NA, 5), beta2 = c(NA, 5), beta_factor = c(NA, 5), E_init = c(NA, 1000)
+                     , t_init = as.Date(c("2020-02-01", "2020-05-01"))
+                     , t_inflect = as.Date(c("2020-02-01", "2020-05-01"))
+)
+
+pls <- list()
+e = "beta_factor"
+for(e in c("beta1", "beta2", "beta_factor", "E_init", "t_init", "t_inflect")){
+  
+  pls[[e]] <-  res %>% 
+    rename(`true:VAR` = paste0("true:", e)) %>% 
+    group_by(`true:VAR`) %>% 
+    summarise_(`mean:VAR` = paste0("mean(", e, ")")
+               , `median:VAR` = paste0("median(", e, ")")
+               , `lowci:VAR` = paste0("quantile.date.or(", e, ", prob = 0.025)")
+               , `highci:VAR` = paste0("quantile.date.or(", e, ", prob = 0.975)")) %>% 
+    ggplot(aes(x = `true:VAR`)) +
+    geom_line(aes(y = `median:VAR`, colour = "Median"), size = 1) + 
+    # geom_line(aes(y = `mean:VAR`, colour = "Mean"), size = 1) +  
+    geom_abline(slope = 1, intercept = 0) + 
+    # geom_ribbon(aes(x = `true:VAR`, ymin = `lowci:VAR`, ymax = `highci:VAR`), colour = "grey", alpha = 0.2) + 
+    labs(title = "", colour = "", x = paste("true", e), y = paste("estimate", e))  + 
+    coord_cartesian(ylim = upper_limits[[e]]) +
+    theme_bw() + 
+    theme(text = element_text(size = 20), legend.position = c(0.2, 0.8)
+          , legend.background = element_rect(fill="white", linetype="solid"))
+  
+}
+
+
+
+ggpubr::ggarrange(plotlist = pls)

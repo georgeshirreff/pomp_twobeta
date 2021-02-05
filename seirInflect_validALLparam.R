@@ -12,12 +12,12 @@ print(commandArgs(trailingOnly = T))
 a = as.numeric(commandArgs(trailingOnly = T)[1])
 
 
-valid_table <- read_csv("input/validation/validation_table_ALLparam.csv")
+valid_table <- read_csv("input/validation/validation_table_ALLparamv2.csv")
 posneg = read_csv(paste0("input/posneg_alltests.csv")) %>%
   transmute(Date = Date %>% as.numeric, pos, neg, Patients, adm, dd) %>%
   filter(Date >= as.numeric(as.Date("2020-02-01"))
          , Date <= as.numeric(as.Date("2020-04-30")))
-# valid_table <- read_csv("~/Pasteur/tars/input/validation/validation_table_ALLparam.csv")
+# valid_table <- read_csv("~/Pasteur/tars/input/validation/validation_table_ALLparamv2.csv")
 # posneg = read_csv("~/Pasteur/tars/input/posneg_alltests.csv") %>%
 #   transmute(Date = Date %>% as.numeric, pos, neg, Patients, adm, dd) %>%
 #   filter(Date >= as.numeric(as.Date("2020-02-01"))
@@ -363,7 +363,7 @@ seirInflect %>% simulate(seed = 3)
 
 
 
-experiment_name = "posneg Inflect validALLparam"
+experiment_name = "posneg Inflect validALLparam wide"
 
 
 valid_table_row = valid_table %>% 
@@ -385,8 +385,9 @@ print(proposal_call)
 
 
 NTESTS = 10
-Nmif = 500
-mif2_Np = 500
+Nmif = 500 #100
+mif2_Np = 500 #10000
+
 
 lik_Np = 10
 lik_rep = 2

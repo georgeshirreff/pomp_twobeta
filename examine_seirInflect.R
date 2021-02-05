@@ -1,3 +1,14 @@
+quantile.date.or <- function(vec, prob){
+  if(class(vec) == "Date"){
+    num_vec = as.numeric(vec)
+    num_vec %>% quantile(prob = prob) %>% as.Date(origin = "1970-01-01")
+  } else {
+    vec %>% quantile(prob = prob)
+  }
+}
+library(GGally)
+
+
 experiment_name = "posneg Inflect"
 experiment_name = "posneg Inflect tinitFeb27"
 experiment_name = "posneg Inflect tinitFeb20"
@@ -13,7 +24,6 @@ res <-  read_csv(paste0("~/Pasteur/tars/output/TOY/cat/seirInflect_", experiment
          , ci =  ifelse(loglik > max(loglik) - ci_interval, "in_ci", "out_ci"))
 
 
-library(GGally)
 
 res %>% 
   filter(ci == "in_ci") %>% 
@@ -23,6 +33,51 @@ res %>%
 
 ggsave(paste0("~/Pasteur/tars/output/Inflection/", "matrix_plot", experiment_name, ".png"), height = 20, width = 30, units = "cm")
 
+
+inflect_tab <- res %>% 
+  filter(ci == "in_ci") %>% 
+  ungroup %>% 
+  summarise(bestbeta1 = beta1[which(loglik == max(loglik))[1]]
+            , minbeta1 = min(beta1)
+            , maxbeta1 = max(beta1)
+            , bestbeta_factor = beta_factor[which(loglik == max(loglik))[1]]
+            , minbeta_factor = min(beta_factor)
+            , maxbeta_factor = max(beta_factor)
+            
+            , bestR0before = R0_before[which(loglik == max(loglik))[1]]
+            , minR0before = min(R0_before)
+            , maxR0before = max(R0_before)
+            , bestR0after = R0_after[which(loglik == max(loglik))[1]]
+            , minR0after = min(R0_after)
+            , maxR0after = max(R0_after)
+            
+            , bestEinit = E_init[which(loglik == max(loglik))[1]]
+            , minEinit = min(E_init)
+            , maxEinit = max(E_init)
+            , besttinit = t_init[which(loglik == max(loglik))[1]]
+            , mintinit = min(t_init)
+            , maxtinit = max(t_init)
+            , besttinflect = t_inflect[which(loglik == max(loglik))[1]]
+            , mintinflect = min(t_inflect)
+            , maxtinflect = max(t_inflect)
+) %>% 
+  mutate(across(contains("tin"), function(x) gsub("^0", " ", format(x, "%d %b")))) %>% 
+  mutate_if(is.numeric, function(x) format(round(x, 2), nsmall = 2)) %>%
+  # mutate_at(c("bestR0", "minR0", "maxR0", "bestEinit", "minEinit", "maxEinit"), function(x) format(round(x, 1), nsmall = 1)) %>%
+  transmute(beta1 = paste0(bestbeta1, " (", minbeta1, "-", maxbeta1, ")")
+            , beta_factor = paste0(bestbeta_factor, " (", minbeta_factor, "-", maxbeta_factor, ")")
+            
+            , R0_before = paste0(bestR0before, " (", minR0before, "-", maxR0before, ")")
+            , R0_after = paste0(bestR0after, " (", minR0after, "-", maxR0after, ")")
+            
+            , E_init = ifelse(minEinit == maxEinit, minEinit, paste0(bestEinit, " (", minEinit, "-", maxEinit, ")"))
+            , t_init = ifelse(mintinit == maxtinit, mintinit, paste0(besttinit, " (", mintinit, "-", maxtinit, ")"))
+            , t_inflect = paste0(besttinflect, " (", mintinflect, "-", maxtinflect, ")")
+  ) %>% 
+  mutate(E_init = gsub("^([ ]?[0-9]+)[.]0$", "\\1", E_init)) %>% 
+  mutate(E_init = gsub("\\( ", "\\(", E_init))
+
+inflect_tab %>% write_csv(paste0("~/Pasteur/tars/output/Inflection/", experiment_name, "_chiffres.csv"))
 
 res %>% 
   filter(ci == "in_ci") %>% 

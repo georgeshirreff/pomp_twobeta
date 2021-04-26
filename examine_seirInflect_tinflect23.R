@@ -92,54 +92,58 @@ library(ggplot2)
 # experiment_name = "posneg ALLward Refresh Einit1 ABStrans"
 # experiment_name = "posneg ALLwardSide Refresh Einit1 ABStrans"
 
+# #   # "posneg ALLward Refresh Einit1"
+# #   # , "posneg ALLward Refresh betaprofile Einit1"
+# #   # , "posneg ALLwardSide Refresh Einit1"
+# #   # , "posneg ALLwardSide Refresh betaprofile Einit1"
+# #   "posneg ALLward Inflect beta2 Einit1"
+# #   , "posneg ALLward Inflect beta1profile Einit1"
+# #   , "posneg ALLward Inflect beta2 Einit1 hypertinflect"
+# #   , "posneg ALLward Inflect beta2 Einit1 ABStrans"
+# # "posneg ALLward Inflect beta2 Einit1 ABStrans"
+# # "posneg ALLward Inflect beta1profile Einit1 ABStrans"
+# # "posneg ALLward Refresh Einit1 ABStrans"
+# # , "posneg ALLwardSide Refresh Einit1 ABStrans"
+# # "posneg ALLward Refresh betaprofile Einit1 topup"
+#   
+#   # "posneg Inflect beta2 Einit1 tinflect12"
+#   # , "posneg Inflect beta2 Einit1 tinflect17"
+#   # , "posneg Inflect beta2 Einit1 tinflect21"
+#   # , "posneg Inflect beta2 Einit1 tinflect23"
+#   # , "posneg Inflect beta1profile Einit1 tinflect12"
+#   # , "posneg Inflect beta1profile Einit1 tinflect17"
+#   # , "posneg Inflect beta1profile Einit1 tinflect21"
+#   # , "posneg Inflect beta1profile Einit1 tinflect23"
+#   
+#   # "posneg Inflect beta2 Einit1 tinflect25"
+#   # , "posneg Inflect beta2 Einit1 tinflect27"
+#   # , "posneg Inflect beta1profile Einit1 tinflect25"
+#   # , "posneg Inflect beta1profile Einit1 tinflect27"
+#   
+#   # "posneg Inflect beta2 Einit10 tinflect23"
+#   # , "posneg Inflect beta1profile Einit10 tinflect23"
+#   # , "posneg Inflect beta2 Einit3 tinflect23"
+#   # , "posneg Inflect beta1profile Einit3 tinflect23"
+#   
+#   # "posneg Inflect beta2 Feb20 Mar23"
+#   # , "posneg Inflect beta1profile Feb20 Mar23"
+#   # , "posneg Inflect beta2 Feb27 Mar23"
+#   # , "posneg Inflect beta1profile Feb27 Mar23"
+#   # , "posneg Inflect beta2 Mar5 Mar23"
+#   # , "posneg Inflect beta1profile Mar5 Mar23"
+#   # 
+#   # , "posneg ALLward Inflect beta2 Einit1 ABStrans tinflect23"
+#   # , "posneg ALLward Inflect beta1profile Einit1 ABStrans tinflect23"
+#   
+#   "posneg Inflect beta1profile Einit1 tinflect23 upto5"
+#   , "posneg Inflect beta1profile Einit3 tinflect23 upto5"
+#   , "posneg Inflect beta1profile Einit10 tinflect23 upto5"
+# for(experiment_name in c(
 
-for(experiment_name in c(
-#   # "posneg ALLward Refresh Einit1"
-#   # , "posneg ALLward Refresh betaprofile Einit1"
-#   # , "posneg ALLwardSide Refresh Einit1"
-#   # , "posneg ALLwardSide Refresh betaprofile Einit1"
-#   "posneg ALLward Inflect beta2 Einit1"
-#   , "posneg ALLward Inflect beta1profile Einit1"
-#   , "posneg ALLward Inflect beta2 Einit1 hypertinflect"
-#   , "posneg ALLward Inflect beta2 Einit1 ABStrans"
-# "posneg ALLward Inflect beta2 Einit1 ABStrans"
-# "posneg ALLward Inflect beta1profile Einit1 ABStrans"
-# "posneg ALLward Refresh Einit1 ABStrans"
-# , "posneg ALLwardSide Refresh Einit1 ABStrans"
-# "posneg ALLward Refresh betaprofile Einit1 topup"
+#   
+# )){
   
-  # "posneg Inflect beta2 Einit1 tinflect12"
-  # , "posneg Inflect beta2 Einit1 tinflect17"
-  # , "posneg Inflect beta2 Einit1 tinflect21"
-  # , "posneg Inflect beta2 Einit1 tinflect23"
-  # , "posneg Inflect beta1profile Einit1 tinflect12"
-  # , "posneg Inflect beta1profile Einit1 tinflect17"
-  # , "posneg Inflect beta1profile Einit1 tinflect21"
-  # , "posneg Inflect beta1profile Einit1 tinflect23"
-  
-  # "posneg Inflect beta2 Einit1 tinflect25"
-  # , "posneg Inflect beta2 Einit1 tinflect27"
-  # , "posneg Inflect beta1profile Einit1 tinflect25"
-  # , "posneg Inflect beta1profile Einit1 tinflect27"
-  
-  # "posneg Inflect beta2 Einit10 tinflect23"
-  # , "posneg Inflect beta1profile Einit10 tinflect23"
-  # , "posneg Inflect beta2 Einit3 tinflect23"
-  # , "posneg Inflect beta1profile Einit3 tinflect23"
-  
-  "posneg Inflect beta2 Feb20 Mar23"
-  , "posneg Inflect beta1profile Feb20 Mar23"
-  , "posneg Inflect beta2 Feb27 Mar23"
-  , "posneg Inflect beta1profile Feb27 Mar23"
-  , "posneg Inflect beta2 Mar5 Mar23"
-  , "posneg Inflect beta1profile Mar5 Mar23"
-  
-  , "posneg ALLward Inflect beta2 Einit1 ABStrans tinflect23"
-  , "posneg ALLward Inflect beta1profile Einit1 ABStrans tinflect23"
-  
-)){
-  
-
+  experiment_name = "posneg ALLwardSide Refresh Einit1 ABStrans"
 
 
 
@@ -170,12 +174,11 @@ res = res_read %>% unique
 # res$beta1 %>% table
 # res$t_inflect %>% table
 # res %>% select(ends_with("t_inflect")) %>% unique
+filename = paste0("~/tars/output/TOY/cat/seirRefresh_", experiment_name, ".csv" )
+res %>%  write_csv(filename)
+# res %>%  write_csv(paste0("~/tars/output/TOY/cat/seirInflect_", experiment_name, ".csv" ))
 
-# res %>%  write_csv(paste0("~/tars/output/TOY/cat/seirRefresh_", experiment_name, ".csv" ))
-res %>%  write_csv(paste0("~/tars/output/TOY/cat/seirInflect_", experiment_name, ".csv" ))
-
-convert_file = paste0("~/tars/output/TOY/cat/seirInflect_", experiment_name, ".csv" )
-convert_file %>% read_csv %>% write_delim(file = convert_file, delim = ";")
+filename %>% read_csv %>% write_delim(file = filename, delim = ";")
 
 }
 
@@ -500,7 +503,7 @@ inflect_results_scatter_tinit[["beta1"]] <- res %>%
   facet_grid(~E_init, scales = "free_y") +
   scale_alpha_manual(values = c(in_ci = 0.5, out_ci = 0.01)) + 
   coord_cartesian(ylim = c(-330, NA)
-                  # , xlim = c(0, 2.5)
+                  , xlim = c(0, 5)
   ) + 
   labs(x = expression(beta[1]), y = "log Likelihood") + 
   theme_bw() +
@@ -834,7 +837,7 @@ itable <- res %>%
   mutate(E_init = gsub("^([ ]?[0-9]+)[.]0$", "\\1", E_init)) %>% 
   mutate(E_init = gsub("\\( ", "\\(", E_init))
 
-itable %>% write_csv(paste0("~/Pasteur/tars/output/Figs/", "inflect_results_table_Einit", ".csv"))
+itable %>% write_delim(paste0("~/tars/output/Figs/", "inflect_results_table_Einit", ".csv"), delim = ";")
 
 
 
@@ -846,7 +849,8 @@ p_beta1 <- res %>%
   # mutate(t_init_expr = expression(paste0(t[init], get(t_init))))
   ggplot(aes(x = beta1, y = loglik, alpha = ci)) + geom_point() + 
   scale_alpha_manual(values = c(in_ci = 0.5, out_ci = 0.01)) + 
-  coord_cartesian(ylim = c(-335, -310)) + 
+  coord_cartesian(ylim = c(-335, -310)
+                  , xlim = c(0, 5)) + 
   facet_grid(. ~ t_init) + 
   geom_hline(aes(yintercept = ci_boundary), linetype = "dashed") + 
   theme_bw() + 
@@ -905,7 +909,7 @@ p_Einit <- res %>%
 
 
 ggsave(ggpubr::ggarrange(plotlist = list(p_beta1, p_beta2, p_Einit), ncol = 1)
-       , filename = paste0("~/Pasteur/tars/output/Figs/", "inflect_results_scatter_Einit", ".png")
+       , filename = paste0("~/tars/output/Figs/", "inflect_results_scatter_Einit", ".png")
        , width = 20, height = 25, units = "cm")
 
 
@@ -1035,9 +1039,9 @@ ggsave(paste0("~/Pasteur/tars/output/Inflection/", "R0_matrix_plot", experiment_
 res = NULL
 for(Eini in c(1)){
   for(analysis in c("beta2", "beta1profile")){
-    exp_name = paste0("posneg Inflect ", analysis, " Einit", Eini)
+    exp_name = paste0("posneg Inflect ", analysis, " Einit", Eini, " tinflect23")
     
-    res_piece = read_csv(paste0("~/tars/output/TOY/cat/seirInflect_", exp_name, ".csv" )) %>% mutate(analysis = analysis)
+    res_piece = read_delim(paste0("~/tars/output/TOY/cat/seirInflect_", exp_name, ".csv" ), delim = ";") %>% mutate(analysis = analysis)
     if(is.null(res)){
       res = res_piece
     } else {
@@ -1190,9 +1194,11 @@ these_approved_sims %<>% left_join(these_approved_sims_meta) %>%
 mode_curve <- these_approved_sims %>% filter(ll == max(ll)) %>% 
   transmute(Date, mode = pos)
 
+
+best_id = these_approved_sims %>% filter(ll == max(ll)) %>% pull(rep) %>% unique %>% {.[1]}
 ## plot
 
-SAR_numer_threshold = 0
+# SAR_numer_threshold = 0
 
 
 # obs_df %>% 
@@ -1259,6 +1265,8 @@ SAR_numer_threshold = 0
 #                      )
 # ggsave(paste0("~/Pasteur/tars/output/Figs/", "approved_sims_updated", ".png"), height = 20, width = 20, units = "cm")
 
+Sys.setlocale("LC_TIME", "English")
+
 SAR_numer_threshold = 3
 obs_df %>% 
   transmute(Date, Data = pos) %>% 
@@ -1273,6 +1281,7 @@ obs_df %>%
                 , median = quantile(pos, 0.5)
                 , max = quantile(pos, 1)
       )) %>% 
+  left_join(these_approved_sims %>% filter(rep == best_id) %>% transmute(Date, max_logLik = pos)) %>% 
   # left_join(mode_curve) %>% 
   ggplot(aes(x = as.Date(Date, origin = "1970-01-01"))) + 
   
@@ -1280,17 +1289,12 @@ obs_df %>%
   geom_ribbon(aes(ymin = lowCI, ymax = highCI), alpha = 0.6, fill = "grey") +
   geom_line(aes(y = highCI, colour = "CI", size = "CI", linetype = "CI")) +
   geom_line(aes(y = lowCI, colour = "CI", size = "CI", linetype = "CI")) +
+  # geom_line(aes(y = max_logLik, colour = "bestFit", size = "bestFit", linetype = "bestFit")) +
   geom_line(aes(y = median, colour = "median", size = "median", linetype = "median")) +
-  # geom_line(aes(y = mode, colour = "mode", size = "mode", linetype = "mode")) +
   geom_point(aes(y = Data, colour = "Data", size = "Data", linetype = "Data")) + 
-  
-  # scale_fill_manual(values = c(Data = "red")) +
-  # scale_colour_manual(values = c(  Data = "red"   , mode = "black" , CI = "grey")) +
-  # scale_linetype_manual(values = c(Data = "blank", mode = "dashed", CI = "solid")) +
-  # scale_size_manual(values = c(    Data = 2       , mode = 1       , CI = 1)) +
-  scale_colour_manual(values = c(  Data = "red"   , median = "black" , mode = "blue", CI = "grey")) +
-  scale_linetype_manual(values = c(Data = "blank", median = "dashed", mode = "dotted", CI = "solid")) +
-  scale_size_manual(values = c(    Data = 2       , median = 1, mode = 1       , CI = 1)) +
+  scale_colour_manual(values = c(  Data = "red"   , bestFit = "blue", median = "black" , mode = "blue", CI = "grey")) +
+  scale_linetype_manual(values = c(Data = "blank", bestFit = "dashed", median = "dashed", mode = "dotted", CI = "solid")) +
+  scale_size_manual(values = c(    Data = 2       , bestFit = 1, median = 1, mode = 1       , CI = 1)) +
   # guides(fill = "Data") +
   labs(x = "", y = "Positive tests", linetype = "Simulations", size = "Simulations", colour = "Simulations") + 
   theme_bw() + theme(text = element_text(size = 20)
@@ -1300,9 +1304,9 @@ obs_df %>%
                                                         # , colour = "black"
                      )
   ) + 
-  geom_segment(x = as.Date("2020-03-19"), xend = as.Date("2020-03-19")
-               , y = 15, yend = 10, arrow = arrow(length = unit(0.1, "inches"), ends = "last")) +
-  geom_text(label = expression(t[inflect]), x = as.Date("2020-03-19"), y = 17, size = 10) + 
+  geom_segment(x = as.Date("2020-03-23"), xend = as.Date("2020-03-23")
+               , y = 21, yend = 15, arrow = arrow(length = unit(0.1, "inches"), ends = "last")) +
+  geom_text(label = expression(t[inflect]), x = as.Date("2020-03-23"), y = 22, size = 10) + 
   coord_cartesian(ylim = c(0, 32))
 
 ggsave(paste0("~/tars/output/Figs/", "new_sims_inflection", ".png"), height = 20, width = 20, units = "cm")

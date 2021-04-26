@@ -14,6 +14,10 @@ jb = as.numeric(commandArgs(trailingOnly = T)[1])
 j = floor(jb/100)
 b = jb %% 100
 
+read_tinit = as.Date(commandArgs(trailingOnly = T)[2])
+read_tinflect = as.Date(commandArgs(trailingOnly = T)[3])
+
+
 posneg = read_csv(paste0("input/posneg_alltests.csv")) %>%
   transmute(Date = Date %>% as.numeric, pos, neg, Patients, adm, dd) %>%
   filter(Date >= as.numeric(as.Date("2020-02-01"))
@@ -378,7 +382,12 @@ seirInflect %>% simulate(seed = 3)
 
 # experiment_name = "posneg Inflect beta2 Feb20 Mar12"
 # experiment_name = "posneg Inflect beta2 Feb20 Mar17"
-experiment_name = "posneg Inflect beta2 Feb20 Mar19"
+# experiment_name = "posneg Inflect beta2 Feb20 Mar19"
+
+experiment_name = paste("posneg Inflect beta2"
+                        , read_tinit %>% format("%b%d") %>% {gsub("0([0-9])$", "\\1", .)}
+                        , read_tinflect %>% format("%b%d") %>% {gsub("0([0-9])$", "\\1", .)})
+
 
 
 NTESTS = 10
@@ -402,6 +411,8 @@ cooling.fraction = 0.5
   
   # start_tinit = "2020-02-20" %>% as.Date %>% as.numeric
   
+  start_tinit = read_tinit %>% as.numeric
+  start_tinflect = read_tinflect %>% as.numeric
   
 
   for(i in 1:NTESTS){
@@ -411,11 +422,11 @@ cooling.fraction = 0.5
     
     # start_tinit = "2020-03-05" %>% as.Date %>% as.numeric
     # start_tinit = "2020-02-27" %>% as.Date %>% as.numeric
-    start_tinit = "2020-02-20" %>% as.Date %>% as.numeric
+    # start_tinit = "2020-02-20" %>% as.Date %>% as.numeric
     
     # start_tinflect = "2020-03-12" %>% as.Date %>% as.numeric
     # start_tinflect = "2020-03-17" %>% as.Date %>% as.numeric
-    start_tinflect = "2020-03-19" %>% as.Date %>% as.numeric
+    # start_tinflect = "2020-03-19" %>% as.Date %>% as.numeric
     
     start_Einit = j #max(1, round(1/runif(1)))
     
@@ -466,7 +477,7 @@ cooling.fraction = 0.5
       # trace = rbind(trace, trace_piece)
     }
     
-    res %>% write_csv(paste0("output/seirInflect_", experiment_name, "_startbeta1", start_beta1, "_startbeta2", start_beta2, "_startEinit", start_Einit , ".csv"))
+    res %>% write_csv(paste0("output/seirInflect_", experiment_name, "_startbeta1", start_beta1, "_startEinit", start_Einit , ".csv"))
     # trace %>% write_csv(paste0("output/seirInflect_", experiment_name, "_startbeta1", start_beta1, "_startbetafactor", start_betafactor, "_starttinflect",  start_tinflect, "_starttinit" = start_tinit, "_startEinit", start_Einit , "_trace.csv"))
     
   }

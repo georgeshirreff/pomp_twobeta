@@ -475,7 +475,7 @@ cooling.fraction = 0.5
       # trace = rbind(trace, trace_piece)
     }
     
-    res %>% write_csv(paste0("output/seirInflect_", experiment_name, "_startbeta1", start_beta1, "_startbeta2", start_beta2, "_startEinit", start_Einit , ".csv"))
+    res %>% write_csv(paste0("output/seirInflect_", experiment_name, "_startbeta1", start_beta1, "_startEinit", start_Einit , ".csv"))
     # trace %>% write_csv(paste0("output/seirInflect_", experiment_name, "_startbeta1", start_beta1, "_startbetafactor", start_betafactor, "_starttinflect",  start_tinflect, "_starttinit" = start_tinit, "_startEinit", start_Einit , "_trace.csv"))
     
   }

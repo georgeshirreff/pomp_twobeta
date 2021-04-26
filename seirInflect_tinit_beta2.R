@@ -382,8 +382,18 @@ seirInflect %>% simulate(seed = 3)
 
 # experiment_name = "posneg Inflect beta2 Einit1"
 # experiment_name = "posneg Inflect beta2 Einit3"
-experiment_name = "posneg Inflect beta2 Einit10"
+# experiment_name = "posneg Inflect beta2 Einit10"
 
+# experiment_name = "posneg Inflect beta2 Einit1 tinflect12"
+# experiment_name = "posneg Inflect beta2 Einit1 tinflect17"
+# # experiment_name = "posneg Inflect beta2 Einit1 tinflect19" # this has already been done "posneg Inflect beta2 Einit1"
+# experiment_name = "posneg Inflect beta2 Einit1 tinflect21"
+# experiment_name = "posneg Inflect beta2 Einit1 tinflect23"
+# experiment_name = "posneg Inflect beta2 Einit1 tinflect25"
+# experiment_name = "posneg Inflect beta2 Einit1 tinflect27"
+
+# experiment_name = "posneg Inflect beta2 Einit3 tinflect23"
+experiment_name = "posneg Inflect beta2 Einit10 tinflect23"
 
 NTESTS = 10
 Nmif = 500
@@ -419,7 +429,12 @@ cooling.fraction = 0.5
     
     # start_tinflect = "2020-03-12" %>% as.Date %>% as.numeric
     # start_tinflect = "2020-03-17" %>% as.Date %>% as.numeric
-    start_tinflect = "2020-03-19" %>% as.Date %>% as.numeric
+    # start_tinflect = "2020-03-19" %>% as.Date %>% as.numeric
+    
+    # start_tinflect = "2020-03-21" %>% as.Date %>% as.numeric
+    start_tinflect = "2020-03-23" %>% as.Date %>% as.numeric
+    # start_tinflect = "2020-03-25" %>% as.Date %>% as.numeric
+    # start_tinflect = "2020-03-27" %>% as.Date %>% as.numeric
     
     # start_Einit = j #max(1, round(1/runif(1)))
     

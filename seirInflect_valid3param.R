@@ -12,12 +12,12 @@ print(commandArgs(trailingOnly = T))
 a = as.numeric(commandArgs(trailingOnly = T)[1])
 # a = 7530
 
-valid_table <- read_csv("input/validation/validation_table_3param_tinit.csv")
+valid_table <- read_csv("input/validation/validation_table_3param_tinit_tinflect23.csv")
 posneg = read_csv(paste0("input/posneg_alltests.csv")) %>%
   transmute(Date = Date %>% as.numeric, pos, neg, Patients, adm, dd) %>%
   filter(Date >= as.numeric(as.Date("2020-02-01"))
          , Date <= as.numeric(as.Date("2020-04-30")))
-# valid_table <- read_csv("~/Pasteur/tars/input/validation/validation_table_3param_tinit.csv")
+# valid_table <- read_csv("~/tars/input/validation/validation_table_3param_tinit_tinflect23.csv")
 # posneg = read_csv("~/Pasteur/tars/input/posneg_alltests.csv") %>%
 #   transmute(Date = Date %>% as.numeric, pos, neg, Patients, adm, dd) %>%
 #   filter(Date >= as.numeric(as.Date("2020-02-01"))
@@ -369,7 +369,8 @@ seirInflect %>% simulate(seed = 3)
 # experiment_name = "posneg Inflect valid4param t_inflectivp20"
 # experiment_name = "posneg Inflect valid4param longhot"
 # experiment_name = "posneg Inflect valid4param startssampled"
-experiment_name = "posneg Inflect valid3param tinit"
+# experiment_name = "posneg Inflect valid3param tinit extinction_threshold0"
+experiment_name = "posneg Inflect valid3param tinit extinction_threshold0 tinflect23"
 
 
 
@@ -403,7 +404,7 @@ mif2_Np = 500 #10000
 lik_Np = 10
 lik_rep = 2
 cooling.fraction = 0.8 #0.5
-extinction_threshold = 3
+extinction_threshold = 0 #3
 extinction_tries = 100
 
 

@@ -390,7 +390,23 @@ seirInflect %>% simulate(seed = 3)
 
 # experiment_name = "posneg Inflect beta1profile Einit1 highbeta1"
 # experiment_name = "posneg Inflect beta1profile Einit3 highbeta1"
-experiment_name = "posneg Inflect beta1profile Einitactual1 highbeta1" 
+# experiment_name = "posneg Inflect beta1profile Einitactual1 highbeta1" 
+
+# experiment_name = "posneg Inflect beta1profile Einit1 tinflect12"
+# experiment_name = "posneg Inflect beta1profile Einit1 tinflect17"
+# # experiment_name = "posneg Inflect beta1profile Einit1 tinflect19" # this has already been done "posneg Inflect beta1profile Einit1"
+# experiment_name = "posneg Inflect beta1profile Einit1 tinflect21"
+# experiment_name = "posneg Inflect beta1profile Einit1 tinflect23"
+# experiment_name = "posneg Inflect beta1profile Einit1 tinflect25"
+# experiment_name = "posneg Inflect beta1profile Einit1 tinflect27"
+
+# experiment_name = "posneg Inflect beta1profile Einit3 tinflect23"
+# experiment_name = "posneg Inflect beta1profile Einit10 tinflect23"
+
+# experiment_name = "posneg Inflect beta1profile Einit1 tinflect23 upto5"
+# experiment_name = "posneg Inflect beta1profile Einit3 tinflect23 upto5"
+experiment_name = "posneg Inflect beta1profile Einit10 tinflect23 upto5"
+
 
 NTESTS = 10
 Nmif = 500
@@ -406,7 +422,7 @@ cooling.fraction = 0.5
 # i = 1
 # b = 1
 
-  betavec = seq(10.1, 20, by = 0.1)
+  betavec = seq(0.1, 5, by = 0.1)
   start_beta1 = betavec[b]
   
   # start_tinit = "2020-02-20" %>% as.Date %>% as.numeric
@@ -418,7 +434,7 @@ cooling.fraction = 0.5
     set.seed(j*b*i + i)
     start_beta2 = runif(1, min = 0, max = 1)
     
-    start_Einit = 1
+    start_Einit = 10
     
     # start_tinit = "2020-03-05" %>% as.Date %>% as.numeric
     # start_tinit = "2020-02-27" %>% as.Date %>% as.numeric
@@ -426,7 +442,13 @@ cooling.fraction = 0.5
     
     # start_tinflect = "2020-03-12" %>% as.Date %>% as.numeric
     # start_tinflect = "2020-03-17" %>% as.Date %>% as.numeric
-    start_tinflect = "2020-03-19" %>% as.Date %>% as.numeric
+    # start_tinflect = "2020-03-19" %>% as.Date %>% as.numeric
+    
+    # start_tinflect = "2020-03-21" %>% as.Date %>% as.numeric
+    start_tinflect = "2020-03-23" %>% as.Date %>% as.numeric
+    # start_tinflect = "2020-03-25" %>% as.Date %>% as.numeric
+    # start_tinflect = "2020-03-27" %>% as.Date %>% as.numeric
+    
     
     # start_Einit = j #max(1, round(1/runif(1)))
     

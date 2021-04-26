@@ -31,14 +31,17 @@ quantile.date.or <- function(vec, prob){
 # experiment_name = "posneg Inflect valid4param startssampled"
 # experiment_name = "posneg Inflect valid3param"
 # experiment_name = "posneg Inflect valid3param beta2"
-experiment_name = "posneg Inflect valid3param longcoldbeta2"
+# experiment_name = "posneg Inflect valid3param longcoldbeta2"
 # experiment_name = "posneg Inflect valid3param hotbeta2"
+# experiment_name = "posneg Inflect valid3param tinit extinction_threshold0"
+experiment_name = "posneg Inflect valid3param tinit extinction_threshold0 tinflect23"
+
 
 # res <- read_csv(paste0("~/Pasteur/tars/output/TOY/BiasTest_TOY_", experiment_name, ".csv"))
 
 
 
-files = list.files(path = "~/Pasteur/tars/output/TOY/", pattern = paste0("*_", experiment_name, "_.*.csv")
+files = list.files(path = "~//output/TOY/output", pattern = paste0("*_", experiment_name, "_.*.csv")
                    , full.names = T)
 
 
@@ -197,11 +200,12 @@ ggsave(paste0("~/Pasteur/tars/output/Inflection/", "validation_", experiment_nam
 # experiment_name = "posneg Inflect valid4param startssampled"
 # experiment_name = "posneg Inflect valid3param"
 # experiment_name = "posneg Inflect valid3param beta2"
-experiment_name = "posneg Inflect valid3param longcoldbeta2"
+# experiment_name = "posneg Inflect valid3param longcoldbeta2"
 # experiment_name = "posneg Inflect valid3param hotbeta2"
+# experiment_name = "posneg Inflect valid3param tinit extinction_threshold0"
+experiment_name = "posneg Inflect valid3param tinit extinction_threshold0 tinflect23"
 
-
-res <- read_csv(paste0("~/Pasteur/tars/output/TOY/cat/BiasTest_seirInflect_", experiment_name, ".csv")) %>% 
+res <- read_delim(paste0("~/tars/output/TOY/cat/BiasTest_seirInflect_", experiment_name, ".csv"), delim = ";") %>% 
   mutate(across(contains("t_"), function(x) as.Date(x, origin = "1970-01-01")))
 
 
@@ -224,10 +228,11 @@ e = "beta2"
 true_labels = c(beta1 = expression(true~beta[1]), beta2 = expression(true~beta[2]), E_init = expression(true~E[init]))
 est_labels = c(beta1 = expression(estimate~beta[1]), beta2 = expression(estimate~beta[2]), E_init = expression(estimate~E[init]))
 
+e = 't_init'
 for(e in c("beta1", "beta2"
            # , "beta_factor"
-           , "E_init"
-           # , "t_init", "t_inflect"
+           , "t_init"
+           # , "E_init", "t_inflect"
            )){
   
   pls[[e]] <-  res %>% 
@@ -238,7 +243,7 @@ for(e in c("beta1", "beta2"
                , `lowci:VAR` = paste0("quantile.date.or(", e, ", prob = 0.025)")
                , `highci:VAR` = paste0("quantile.date.or(", e, ", prob = 0.975)")) %>% 
     ggplot(aes(x = `true:VAR`)) +
-    geom_point(aes(y = `median:VAR`), size = 1) + 
+    geom_point(aes(y = `median:VAR`), size = 1, alpha = 0.2) +
     # geom_point(aes(y = `mean:VAR`, colour = "Mean"), size = 1) +
     geom_abline(slope = 1, intercept = 0) + 
     # geom_ribbon(aes(x = `true:VAR`, ymin = `lowci:VAR`, ymax = `highci:VAR`), colour = "grey", alpha = 0.2) +
@@ -255,13 +260,13 @@ for(e in c("beta1", "beta2"
 pls[["E_init"]] = pls[["E_init"]] + scale_x_log10() + scale_y_log10() + coord_cartesian(ylim = c(1, 100))
 ggpubr::ggarrange(plotlist = pls, ncol = 3)
 
-ggsave(paste0("~/Pasteur/tars/output/Figs/", "validation_", experiment_name, ".png"), units = "cm", width = 30, height = 12)
+ggsave(paste0("~/tars/output/Figs/", "validation_", experiment_name, ".png"), units = "cm", width = 30, height = 12)
 
 experiment_name = "posneg Inflect valid3param beta2"
 experiment_name = "posneg Inflect valid3param longcoldbeta2"
 
 
-res <- read_csv(paste0("~/Pasteur/tars/output/TOY/cat/BiasTest_seirInflect_", experiment_name, ".csv")) %>% 
+res <- read_delim(paste0("~/tars/output/TOY/cat/BiasTest_seirInflect_", experiment_name, ".csv"), delim = ";") %>% 
   mutate(across(contains("t_"), function(x) as.Date(x, origin = "1970-01-01")))
 
 

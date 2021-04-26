@@ -1,14 +1,51 @@
 library(pomp)
+library(tidyverse)
+library(magrittr)
+library(ggplot2)
 
-posneg = read_csv("~/tars/input/posneg_alltests.csv") %>%
+
+print(commandArgs(trailingOnly = T))
+
+# b = as.numeric(commandArgs(trailingOnly = T)[1])
+# j = as.numeric(commandArgs(trailingOnly = T)[1])
+
+jbwardNum = as.numeric(commandArgs(trailingOnly = T)[1])
+
+wardNum = floor(jbwardNum/1000)
+j = floor((jbwardNum - wardNum*1000)/100)
+b = jbwardNum %% 100
+
+# wardNum = commandArgs(trailingOnly = T)[2]
+
+wardCode = paste0(case_when(wardNum %in% 1:4 ~ "A"
+                            , wardNum %in% 5:8 ~ "B"
+                            , wardNum %in% 9:12 ~ "C")
+                  , ((wardNum-1) %% 4))
+
+
+wardName = paste0(case_when(wardNum %in% 1:4 ~ "Galien"
+                            , wardNum %in% 5:8 ~ "Hamburger"
+                            , wardNum %in% 9:12 ~ "Rabelais")
+                  , "_",  ((wardNum-1) %% 4))
+
+wardSeed = 3^wardNum
+
+posneg = read_csv(paste0("input/posneg_alltests","_", wardName,".csv")) %>%
   transmute(Date = Date %>% as.numeric, pos, neg, Patients, adm, dd) %>%
   filter(Date >= as.numeric(as.Date("2020-02-01"))
          , Date <= as.numeric(as.Date("2020-04-30")))
+# posneg = read_csv(paste0("~/Pasteur/tars/input/posneg_alltests","_", wardName,".csv")) %>%
+#   transmute(Date = Date %>% as.numeric, pos, neg, Patients, adm, dd) %>%
+#   filter(Date >= as.numeric(as.Date("2020-02-01"))
+#          , Date <= as.numeric(as.Date("2020-04-30")))
 
-
+if(posneg$Patients[1] == 0){ #hack if there are no patients at the beginning, which makes the likelihood zero, add a patient
+  entry_point = min(which(posneg$Patients > 0))
+  posneg$Patients[1:(entry_point - 1)] = 1
+}
 
 tests_tab <- posneg %>% transmute(Date
-                                  , tests = pos + neg
+                                   , tests = pos + neg
                                   , tomorrows_tests = c(tests[-1], 0)
                                   , tomorrows_adm = c(adm[-1], 0)
                                   , tomorrows_dd = c(dd[-1], 0)) %>%
@@ -16,12 +53,16 @@ tests_tab <- posneg %>% transmute(Date
 
 
 
+
+
 posneg %>% 
   pomp(t0 = posneg$Date[1]
        , times="Date"
        , params=c(beta1 = 0.5 # frequency-dependent transmission rate from Is (symptomatic infection)
-                  , beta2 = 0.2
-                  , t_inflect = "2020-03-19" %>% as.Date %>% as.numeric
+                  # , beta_factor = 1
+                  , beta2 = 0.1
+                  
+                  , t_inflect = "2020-04-01" %>% as.Date %>% as.numeric
                   
                   , alpha = 1/3.4 #Li et al. latent period #0.2
                   , gamma = 1/2.3 #He et al. pre-symptomatic infectious period #Zhang et al. incubation period - Li et al. latent period # 0.5 # Pashka
@@ -143,9 +184,9 @@ posneg %>%
                         
                         ")
        , rprocess=gillespie_hl(
-         
+
          # initial seed of infection
-         
+
          # transitions between untested compartments
          initEfromS = list("rate = (floor(t) == nearbyint(t_init)-1 & nearbyint(E_toInfect) > 0.1) ? 1e6*S : 0;"
                            , c(S=-1, E=+1, Es= 0, Ea= 0, Is= 0, Ia= 0, Rp= 0, R= 0, NUntested= 0, N= 0, ST= 0, ET= 0, EsT= 0, EaT= 0, IsT= 0, IaT= 0, RpT= 0, RT= 0, NT= 0, SToday= 0, EToday= 0, EsToday= 0, EaToday= 0, IsToday= 0, IaToday= 0, RpToday= 0, RToday= 0, NToday= 0, E_toInfect=-1, SAR_numer=+1, SAR_denom= 0, Ninfected=+1, AToday= 0, DDToday= 0))
@@ -168,7 +209,7 @@ posneg %>%
                          , c(S= 0, E= 0, Es= 0, Ea= 0, Is= 0, Ia=-1, Rp=+1, R= 0, NUntested= 0, N= 0, ST= 0, ET= 0, EsT= 0, EaT= 0, IsT= 0, IaT= 0, RpT= 0, RT= 0, NT= 0, SToday= 0, EToday= 0, EsToday= 0, EaToday= 0, IsToday= 0, IaToday= 0, RpToday= 0, RToday= 0, NToday= 0, E_toInfect= 0, SAR_numer= 0, SAR_denom= 0, Ninfected=-1, AToday= 0, DDToday= 0))
          , RptoR = list("rate = omega*Rp;"
                         , c(S= 0, E= 0, Es= 0, Ea= 0, Is= 0, Ia= 0, Rp=-1, R=+1, NUntested= 0, N= 0, ST= 0, ET= 0, EsT= 0, EaT= 0, IsT= 0, IaT= 0, RpT= 0, RT= 0, NT= 0, SToday= 0, EToday= 0, EsToday= 0, EaToday= 0, IsToday= 0, IaToday= 0, RpToday= 0, RToday= 0, NToday= 0, E_toInfect= 0, SAR_numer= 0, SAR_denom= 0, Ninfected= 0, AToday= 0, DDToday= 0))
-         
+
          , STtoET = list("double beta = t < t_inflect ? beta1 : beta2;
                          rate = ST*beta*(epsilon*(Es + EsT + kappa1*(Ea + EaT)) + (Is + IsT + kappa1*(Ia + IaT)))/N;"
                          , c(S= 0, E= 0, Es= 0, Ea= 0, Is= 0, Ia= 0, Rp= 0, R= 0, NUntested= 0, N= 0, ST=-1, ET=+1, EsT= 0, EaT= 0, IsT= 0, IaT= 0, RpT= 0, RT= 0, NT= 0, SToday= 0, EToday= 0, EsToday= 0, EaToday= 0, IsToday= 0, IaToday= 0, RpToday= 0, RToday= 0, NToday= 0, E_toInfect= 0, SAR_numer=+1, SAR_denom= 0, Ninfected=+1, AToday= 0, DDToday= 0))
@@ -186,7 +227,7 @@ posneg %>%
                            , c(S= 0, E= 0, Es= 0, Ea= 0, Is= 0, Ia= 0, Rp= 0, R= 0, NUntested= 0, N= 0, ST= 0, ET= 0, EsT= 0, EaT= 0, IsT= 0, IaT=-1, RpT=+1, RT= 0, NT= 0, SToday= 0, EToday= 0, EsToday= 0, EaToday= 0, IsToday= 0, IaToday= 0, RpToday= 0, RToday= 0, NToday= 0, E_toInfect= 0, SAR_numer= 0, SAR_denom= 0, Ninfected=-1, AToday= 0, DDToday= 0))
          , RpTtoRT = list("rate = omega*RpT;"
                           , c(S= 0, E= 0, Es= 0, Ea= 0, Is= 0, Ia= 0, Rp= 0, R= 0, NUntested= 0, N= 0, ST= 0, ET= 0, EsT= 0, EaT= 0, IsT= 0, IaT= 0, RpT=-1, RT=+1, NT= 0, SToday= 0, EToday= 0, EsToday= 0, EaToday= 0, IsToday= 0, IaToday= 0, RpToday= 0, RToday= 0, NToday= 0, E_toInfect= 0, SAR_numer= 0, SAR_denom= 0, Ninfected=-1, AToday= 0, DDToday= 0))
-         
+
          , Stest = list("rate = tomorrows_tests - NToday > 0 ? S*1e6 : 0;"
                         , c(S=-1, E= 0, Es= 0, Ea= 0, Is= 0, Ia= 0, Rp= 0, R= 0, NUntested=-1, N= 0, ST=+1, ET= 0, EsT= 0, EaT= 0, IsT= 0, IaT= 0, RpT= 0, RT= 0, NT=+1, SToday=+1, EToday= 0, EsToday= 0, EaToday= 0, IsToday= 0, IaToday= 0, RpToday= 0, RToday= 0, NToday=+1, E_toInfect= 0, SAR_numer= 0, SAR_denom= 0, Ninfected= 0, AToday= 0, DDToday= 0))
          , Etest = list("rate = tomorrows_tests - NToday > 0 ? E*1e6 : 0;"
@@ -219,10 +260,10 @@ posneg %>%
                            , c(S= 0, E= 0, Es= 0, Ea= 0, Is= 0, Ia= 0, Rp= 0, R= 0, NUntested= 0, N= 0, ST= 0, ET= 0, EsT= 0, EaT= 0, IsT= 0, IaT= 0, RpT= 0, RT= 0, NT= 0, SToday= 0, EToday= 0, EsToday= 0, EaToday= 0, IsToday= 0, IaToday= 0, RpToday=+1, RToday= 0, NToday=+1, E_toInfect= 0, SAR_numer= 0, SAR_denom= 0, Ninfected= 0, AToday= 0, DDToday= 0))
          , Rretest = list("rate = tomorrows_tests - NToday > 0 ? phi*RT*1e6 : 0;"
                           , c(S= 0, E= 0, Es= 0, Ea= 0, Is= 0, Ia= 0, Rp= 0, R= 0, NUntested= 0, N= 0, ST= 0, ET= 0, EsT= 0, EaT= 0, IsT= 0, IaT= 0, RpT= 0, RT= 0, NT= 0, SToday= 0, EToday= 0, EsToday= 0, EaToday= 0, IsToday= 0, IaToday= 0, RpToday= 0, RToday=+1, NToday=+1, E_toInfect= 0, SAR_numer= 0, SAR_denom= 0, Ninfected= 0, AToday= 0, DDToday= 0))
-         
+
          , Sin = list("rate = (tomorrows_adm - AToday > 0) ? 1e6 : 0;"
                       , c(S=+1, E= 0, Es= 0, Ea= 0, Is= 0, Ia= 0, Rp= 0, R= 0, NUntested=+1, N=+1, ST= 0, ET= 0, EsT= 0, EaT= 0, IsT= 0, IaT= 0, RpT= 0, RT= 0, NT= 0, SToday= 0, EToday= 0, EsToday= 0, EaToday= 0, IsToday= 0, IaToday= 0, RpToday= 0, RToday= 0, NToday= 0, E_toInfect= 0, SAR_numer= 0, SAR_denom=+1, Ninfected= 0, AToday=+1, DDToday= 0))
-         
+
          , Sout = list("rate = (tomorrows_dd - DDToday > 0) ? S*1e6 : 0;"
                        , c(S=-1, E= 0, Es= 0, Ea= 0, Is= 0, Ia= 0, Rp= 0, R= 0, NUntested=-1, N=-1, ST= 0, ET= 0, EsT= 0, EaT= 0, IsT= 0, IaT= 0, RpT= 0, RT= 0, NT= 0, SToday= 0, EToday= 0, EsToday= 0, EaToday= 0, IsToday= 0, IaToday= 0, RpToday= 0, RToday= 0, NToday= 0, E_toInfect= 0, SAR_numer= 0, SAR_denom= 0, Ninfected= 0, AToday= 0, DDToday=+1))
          , Eout = list("rate = (tomorrows_dd - DDToday > 0) ? E*1e6 : 0;"
@@ -255,7 +296,7 @@ posneg %>%
                          , c(S= 0, E= 0, Es= 0, Ea= 0, Is= 0, Ia= 0, Rp= 0, R= 0, NUntested= 0, N=-1, ST= 0, ET= 0, EsT= 0, EaT= 0, IsT= 0, IaT= 0, RpT=-1, RT= 0, NT=-1, SToday= 0, EToday= 0, EsToday= 0, EaToday= 0, IsToday= 0, IaToday= 0, RpToday= 0, RToday= 0, NToday= 0, E_toInfect= 0, SAR_numer= 0, SAR_denom= 0, Ninfected= 0, AToday= 0, DDToday=+1))
          , RTout = list("rate = (tomorrows_dd - DDToday > 0) ? RT*1e6 : 0;"
                         , c(S= 0, E= 0, Es= 0, Ea= 0, Is= 0, Ia= 0, Rp= 0, R= 0, NUntested= 0, N=-1, ST= 0, ET= 0, EsT= 0, EaT= 0, IsT= 0, IaT= 0, RpT= 0, RT=-1, NT=-1, SToday= 0, EToday= 0, EsToday= 0, EaToday= 0, IsToday= 0, IaToday= 0, RpToday= 0, RToday= 0, NToday= 0, E_toInfect= 0, SAR_numer= 0, SAR_denom= 0, Ninfected= 0, AToday= 0, DDToday=+1))
-         
+
          , hmax = 0.5
        )
        , accumvars = c("SToday", "EToday", "EsToday", "EaToday", "IsToday", "IaToday", "RpToday", "RToday", "NToday", "AToday", "DDToday")
@@ -322,3 +363,124 @@ posneg %>%
                              
                              ")
        ) -> seirInflect
+
+# # R0 calculation
+# seirInflect@params["beta"]/seirInflect@params["delta"]
+
+with(seirInflect@params %>% as.list
+     , beta1*(psi*(1/gamma*epsilon + 1/(delta)) + kappa1*(1-psi)*(1/(gamma*kappa2)*epsilon + 1/(delta*kappa3))))
+with(seirInflect@params %>% as.list
+     , beta2*(psi*(1/gamma*epsilon + 1/(delta)) + kappa1*(1-psi)*(1/(gamma*kappa2)*epsilon + 1/(delta*kappa3))))
+
+# quick sim
+seirInflect %>% simulate(seed = 3)
+
+
+
+
+
+# experiment_name = "posnegWard Inflect beta2 Einit1"
+
+experiment_name = "posneg ALLward Inflect beta1profile Einit1 tinflect"
+
+
+NTESTS = 10
+Nmif = 500
+mif2_Np = 500
+
+lik_Np = 100000
+lik_rep = 10
+cooling.fraction = 0.5
+
+# relative proposal size by the end of run
+# 0.02*cooling.fraction/(Nmif/50)
+
+# i = 1
+# b = 1
+
+  betavec = seq(0.1, 10, by = 0.1)
+  start_beta1 = betavec[b]
+  
+  # start_tinit = "2020-02-20" %>% as.Date %>% as.numeric
+  start_tinit_vec = seq(as.Date("2020-02-17"), as.Date("2020-03-12"), by = 3)  
+  start_tinit = start_tinit_vec[j]
+  
+  set.seed(wardNum*j*b)
+  start_tinflect = sample(size = 1, as.Date("2020-03-15"):as.Date("2020-04-01"))
+  
+
+  for(i in 1:NTESTS){
+    
+    set.seed(wardNum*j*b*i + i)
+    start_beta2 = runif(1, min = 0, max = 1)
+    
+    start_Einit = 1 #3 #10
+    
+    # start_tinit = "2020-03-05" %>% as.Date %>% as.numeric
+    # start_tinit = "2020-02-27" %>% as.Date %>% as.numeric
+    # start_tinit = "2020-02-20" %>% as.Date %>% as.numeric
+    
+    # start_tinflect = "2020-03-12" %>% as.Date %>% as.numeric
+    # start_tinflect = "2020-03-17" %>% as.Date %>% as.numeric
+    # start_tinflect = "2020-03-19" %>% as.Date %>% as.numeric
+    # 
+    # start_Einit = j #max(1, round(1/runif(1)))
+    
+    print(i)
+    print(c(start_beta1, start_beta2, start_tinflect, start_tinit, start_Einit))
+    
+    orig_seed = b*100*j^2 + wardSeed*i
+    updated_seed = orig_seed
+    set.seed(updated_seed)
+    
+    seirInflect %>% 
+      mif2(params = seirInflect@params %>% replace(c("beta1", "beta2", "t_inflect", "t_init", "E_init"), c(start_beta1, start_beta2, start_tinflect, start_tinit, start_Einit))
+           , Np=mif2_Np, Nmif=Nmif #Np = 10, Nmif = 100 seems fine
+           , partrans=parameter_trans(log=c("beta2"))
+           , paramnames=c("beta2", "t_init", "t_inflect")
+           , cooling.fraction.50=cooling.fraction
+           , rw.sd=rw.sd(beta1 = 0 #ifelse(time < start_tinflect, 0.02, 0)
+                         , beta2 = ifelse(time >= start_tinflect, 0.02, 0)
+                         , t_init=ivp(1)
+                         , t_inflect=ivp(1))
+      ) -> mif_out
+    
+    
+    replicate(n = lik_rep
+              , mif_out %>% pfilter(Np=lik_Np
+                                    # , cdir = ".", cfile = "fixSEIRreps"
+                                    # , verbose = T
+              ) %>% logLik()
+    ) %>% logmeanexp(se=TRUE) -> ll
+    
+    res_piece <- mif_out %>% coef() %>% bind_rows() %>%
+      bind_cols(loglik=ll[1],loglik.se=ll[2], rep = i, seed = updated_seed, wardName = wardName, wardCode = wardCode
+                , start_beta1 = start_beta1, start_beta2 = start_beta2
+                , start_tinflect = start_tinflect, start_tinit = start_tinit
+                , start_Einit = start_Einit)
+    
+    # trace_piece <- mif_out %>% traces %>% 
+    #   as_tibble %>% 
+    #   transmute(iteration = 0:(n()-1)
+    #             , loglik, rep = i, seed = updated_seed, beta1, beta_factor, t_inflect, E_init, t_init, start_betafactor, start_tinflect, start_tinit = start_tinit
+    #             , start_Einit = start_Einit)
+    
+    
+    if(i == 1){
+      res = res_piece
+      # trace = trace_piece
+    } else {
+      res <- rbind(res, res_piece)
+      # trace = rbind(trace, trace_piece)
+    }
+    
+    res %>% write_csv(paste0("output/seirInflect_", experiment_name, "_", wardCode, "_startbeta1", start_beta1, "_starttinit", start_tinit , ".csv"))
+    # trace %>% write_csv(paste0("output/seirInflect_", experiment_name, "_startbeta1", start_beta1, "_startbetafactor", start_betafactor, "_starttinflect",  start_tinflect, "_starttinit" = start_tinit, "_startEinit", start_Einit , "_trace.csv"))
+    
+  }
+  
+  # res %>% write_csv(paste0("output/BiasTest_TOY_", experiment_name, ".csv"))
+
+
+# }
+

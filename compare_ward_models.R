@@ -201,7 +201,6 @@ exp_name_prof = "posneg ALLward Refresh betaprofile Einit1"
 pars = 2
 ci_interval <- 0.5*qchisq(df=pars,p=0.95)
 
-
 res_ward_refresh <- rbind(read_delim(paste0("~/tars/output/TOY/cat/seirRefresh_", exp_name, ".csv" ), delim = ";") %>% mutate(analysis = "beta2")
                           , read_delim(paste0("~/tars/output/TOY/cat/seirRefresh_", exp_name_prof, ".csv" ), delim = ";") %>% mutate(analysis = "beta1profile"))%>% 
   mutate(R0 = beta*(psi*(1/gamma*epsilon + 1/(delta)) + kappa1*(1-psi)*(1/(gamma*kappa2)*epsilon + 1/(delta*kappa3)))) %>% 
@@ -302,6 +301,78 @@ refresh_wtable <- res_ward_refresh %>%
 # refresh_wtable %>% write_csv(paste0("~/tars/output/Wards/", exp_name, "_wtable.csv"))
 refresh_wtable %>% write_delim(paste0("~/tars/output/Wards/", exp_name, "_wtable.csv"), delim = ";")
 
+
+
+### side
+
+exp_name = "posneg ALLwardSide Refresh Einit1 ABStrans"
+pars = 2
+ci_interval <- 0.5*qchisq(df=pars,p=0.95)
+
+
+
+res_ward_refresh <- read_delim(paste0("~/tars/output/TOY/cat/seirRefresh_", exp_name, ".csv" ), delim = ";") %>% 
+  mutate(R0 = beta*(psi*(1/gamma*epsilon + 1/(delta)) + kappa1*(1-psi)*(1/(gamma*kappa2)*epsilon + 1/(delta*kappa3)))) %>% 
+  mutate_at(c("t_init", "start_tinit"), function(x) as.Date(x, origin = "1970-01-01")) %>% 
+  group_by(wardCode) %>% 
+  mutate(ci_boundary = max(loglik) - ci_interval
+         , ci =  ifelse(loglik > max(loglik) - ci_interval, "in_ci", "out_ci")) %>% 
+  ungroup
+
+refresh_wtable <- res_ward_refresh %>%  
+  group_by(wardCode, E_init) %>% 
+  mutate(ci_boundary = max(loglik) - ci_interval
+         , ci =  ifelse(loglik > max(loglik) - ci_interval, "in_ci", "out_ci")
+         , AIC = 2*pars - 2*max(loglik)) %>% 
+  filter(ci == "in_ci") %>%
+  summarise(max_loglik = max(loglik)
+            , bestbeta = beta[loglik == max(loglik)]
+            , minbeta = min(beta)
+            , maxbeta = max(beta)
+            , bestt_init = t_init[loglik == max(loglik)]
+            , mint_init = min(t_init)
+            , maxt_init = max(t_init)
+            , bestR0 = R0[which(loglik == max(loglik))[1]]
+            , minR0 = min(R0)
+            , maxR0 = max(R0)
+            , AIC = mean(AIC)
+  ) %>% 
+  ungroup %>% 
+  mutate(across(contains("t_in"), function(x) gsub("^0", " ", format(x, "%d %b")))) %>% 
+  mutate_if(is.numeric, function(x) format(round(x, 2), nsmall = 2)) %>%
+  # mutate_at(c("bestR0", "minR0", "maxR0", "bestEinit", "minEinit", "maxEinit"), function(x) format(round(x, 1), nsmall = 1)) %>%
+  transmute(wardCode
+            , E_init
+            , beta = paste0(bestbeta, "\n(", minbeta, "-", maxbeta, ")")
+            # , beta_factor = paste0(bestbeta_factor, " (", minbeta_factor, "-", maxbeta_factor, ")")
+            , R0 = paste0(bestR0, "\n(", minR0, "-", maxR0, ")")
+            
+            , t_init = paste0(bestt_init, "\n(", mint_init, "-", maxt_init, ")")
+            , AIC
+            
+  ) %>% 
+  mutate(E_init = as.numeric(E_init %>% trimws))
+
+
+
+res_ward_refresh %>%
+  group_by(wardCode) %>% 
+  ggplot(aes(x = beta, y = loglik, alpha = ci, colour = wardCode)) + geom_point() + 
+  geom_hline(aes(yintercept = ci_boundary, colour = wardCode), linetype = "dashed") + 
+  facet_wrap(~wardCode, scales = "free_y") +
+  scale_alpha_manual(values = c(in_ci = 0.5, out_ci = 0.01)) + 
+  # scale_x_continuous(breaks = seq(0, 2, by = 0.5), minor_breaks = seq(0, 10, by = 0.1)) + 
+  labs(x = expression(beta), y = "log Likelihood", alpha = "") +
+  theme_bw() +
+  theme(text = element_text(size = 20)
+        , panel.grid.major.x = element_line(size = 1)) + 
+  guides(alpha = F, colour = F) + 
+  coord_cartesian(ylim = c(NA, NA)
+                  , xlim = c(0, 10)
+  )
+
+# refresh_wtable %>% write_csv(paste0("~/tars/output/Wards/", exp_name, "_wtable.csv"))
+refresh_wtable %>% write_delim(paste0("~/tars/output/Wards/", exp_name, "_wtable.csv"), delim = ";")
 
 
 

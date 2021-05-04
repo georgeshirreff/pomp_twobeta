@@ -630,6 +630,10 @@ tinf_table <- res %>%
             , minrisk_ratio = min(risk_ratio)
             , maxrisk_ratio = max(risk_ratio)
             
+            , best_eff = 1-risk_ratio[which(loglik == max(loglik))[1]]
+            , min_eff = 1-max(risk_ratio)
+            , max_eff = 1-min(risk_ratio)
+            
             , AIC = mean(AIC)
   ) %>% 
   ungroup %>% 
@@ -646,6 +650,7 @@ tinf_table <- res %>%
             
             , R0 = paste0(bestR0, "\n(", minR0, "-", maxR0, ")")
             , risk_ratio = paste0(bestrisk_ratio, "\n(", minrisk_ratio, "-", maxrisk_ratio, ")")
+            , eff = paste0(best_eff, "\n(", min_eff, "-", max_eff, ")")
             
             , t_init = paste0(bestt_init, "\n(", mint_init, "-", maxt_init, ")")
             , AIC

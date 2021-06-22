@@ -145,7 +145,7 @@ ggsave(paste0("~/Pasteur/tars/output/Inflection/", "validation_", experiment_nam
 
 experiment_name = "posneg Inflect valid2param"
 
-res <- read_csv(paste0("~/Pasteur/tars/output/TOY/cat/BiasTest_seirInflect_", experiment_name, ".csv")) %>% 
+res <- read_csv(paste0("~/tars/output/TOY/cat/BiasTest_seirInflect_", experiment_name, ".csv")) %>% 
   mutate(across(contains("t_"), function(x) as.Date(x, origin = "1970-01-01")))
 
 params = c("beta1", "beta_factor", "E_init", "t_init", "t_inflect")

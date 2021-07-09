@@ -174,6 +174,9 @@ res = res_read %>% unique
 # res$beta1 %>% table
 # res$t_inflect %>% table
 # res %>% select(ends_with("t_inflect")) %>% unique
+
+
+# filename = paste0("~/tars/output/TOY/cat/seirInflect_", experiment_name, ".csv" )
 filename = paste0("~/tars/output/TOY/cat/seirRefresh_", experiment_name, ".csv" )
 res %>%  write_csv(filename)
 # res %>%  write_csv(paste0("~/tars/output/TOY/cat/seirInflect_", experiment_name, ".csv" ))
@@ -1074,7 +1077,8 @@ res <- res %>%
 #   filter(Date >= as.numeric(as.Date("2020-02-01"))
 #          , Date <= as.numeric(as.Date("2020-04-30")))
 
-source("~/pomp_twobeta/seirInflect_source.R")
+# source("~/pomp_twobeta/seirInflect_source.R")
+source("~/pomp_twobeta/seirInflect_source_inc.R")
 
 best_params = res %>% 
   select(seirInflect@params %>% names, starts_with("loglik")) %>% 
@@ -1126,6 +1130,17 @@ new_sims <- seirInflect %>% simulate(params = seirInflect@params %>% replace(c("
          , E_init = best_params["E_init"]
          , t_inflect = best_params["t_inflect"]
 )
+
+new_sims %>% 
+  filter(.id %in% 1) %>% 
+  ggplot(aes(x = Date, y = SAR_numer, group = .id, colour = as.factor(.id))) + 
+  geom_line()
+
+
+
+# new_sims %>% 
+#   filter(.id %in% 1) %>% 
+#   pull(SAR_numer)
 # 
 # new_sims_fixedtinit <- seirPoisson %>% simulate(params = best_params %>% replace("t_init", as.Date("2020-03-05") %>% as.numeric)
 #                                  , seed = 1, nsim = NSIM, include.data = F, format = "data.frame") %>% 
@@ -1170,9 +1185,56 @@ for(i in 1:NSETS){
   
   this_approved_sims <- this_approved_sims_pompobj %>% as.data.frame %>% transmute(Date
                                                                                    , rep = i #as.numeric(.id)
-                                                                                   , pos = pos
-                                                                                   , SAR_numer = SAR_numer
-  )
+                                                                                   , pos
+                                                                                   , SAR_numer
+                                                                                   # , DailyInc
+                                                                                   # , Ninfected
+                                                                                   # , N
+                                                                                   # , presymptomatic = (E + ET) * seirInflect@params["psi"] + Es + EsT
+                                                                                   # , asymptomatic = (E + ET) * (1 - seirInflect@params["psi"]) + Ea + EaT + Ia + IaT
+                                                                                   # , symptomatic = Is + IsT
+                                                                                   # , presymptomatic_tested = (EToday) * seirInflect@params["psi"] + EsToday
+                                                                                   # , asymptomatic_tested = (EToday) * (1 - seirInflect@params["psi"]) + EaToday + IaToday
+                                                                                   # , symptomatic_tested = IsToday
+                                                                                   # 
+                                                                                   # , cumulative_untested = Undetected
+                                                                                   
+                                                                                   # , Ea, Es, EaT, EsT
+                                                                                   # , Ia, Is, IaT, IsT
+                                                                                   # , N
+                                                                                   
+                                                                                   , pAsymptomatic_undetected = (Ea + Ia + EaT*(1-seirInflect@params["Zea"]) + IaT*(1-seirInflect@params["Zia"]))/N
+                                                                                   , pSymptomatic_undetected = (Es + Is + EsT*(1-seirInflect@params["Zes"]) + IsT*(1-seirInflect@params["Zis"]))/N
+                                                                                   , pAsymptomatic_detected = (EaT*seirInflect@params["Zea"] + IaT*seirInflect@params["Zia"])/N
+                                                                                   , pSymptomatic_detected = (EsT*seirInflect@params["Zes"] + IsT*seirInflect@params["Zis"])/N
+                                                                                   
+                                                                                   
+                                                                                   
+                                                                                   # , presymptomatic_caught = EToday*seirInflect@params["psi"]*seirInflect@params["Ze"] + 
+                                                                                   #                           EsToday*seirInflect@params["Zes"]
+                                                                                   # , symptomatic_caught = IsToday*seirInflect@params["Zis"]
+                                                                                   # , asymptomatic_caught = EToday*(1-seirInflect@params["psi"])*seirInflect@params["Ze"] + 
+                                                                                   #                         EaToday*seirInflect@params["Zea"] + 
+                                                                                   #                         IaToday*seirInflect@params["Zia"]
+                                                                                   # 
+                                                                                   # , symptomatic_missed = sympt_untested_rec + 
+                                                                                   #                        E_untested_dis*seirInflect@params["psi"] + 
+                                                                                   #                        sympt_untested_dis + 
+                                                                                   #                        EToday*seirInflect@params["psi"]*(1-seirInflect@params["Ze"]) + 
+                                                                                   #                        EsToday*(1-seirInflect@params["Zes"]) + 
+                                                                                   #                        IsToday*(1-seirInflect@params["Zis"])
+                                                                                   # , asymptomatic_missed = asympt_untested_rec + 
+                                                                                   #                         E_untested_dis*(1-seirInflect@params["psi"]) + 
+                                                                                   #                         asympt_untested_dis + 
+                                                                                   #                         EToday*(1-seirInflect@params["psi"])*(1-seirInflect@params["Ze"]) + 
+                                                                                   #                         EaToday*(1-seirInflect@params["Zea"]) + 
+                                                                                   #                         IaToday*(1-seirInflect@params["Zia"])
+                                                                                   # 
+                                                                                   # , infected_retest = retest
+                                                                                   
+
+  
+                                                                                   )
   
   this_approved_sims_meta <- data.frame(rep = i #as.numeric(.id)
                                         , seed_index = these_paramsets[i]
@@ -1196,14 +1258,78 @@ for(i in 1:NSETS){
 these_approved_sims %<>% left_join(these_approved_sims_meta) %>%
   mutate(seed_index = rep)
 
-mode_curve <- these_approved_sims %>% filter(ll == max(ll)) %>% 
-  transmute(Date, mode = pos)
+# mode_curve <- these_approved_sims %>% filter(ll == max(ll)) %>% 
+#   transmute(Date, mode = pos)
 
 
-best_id = these_approved_sims %>% filter(ll == max(ll)) %>% pull(rep) %>% unique %>% {.[1]}
+# best_id = these_approved_sims %>% filter(ll == max(ll)) %>% pull(rep) %>% unique %>% {.[1]}
 ## plot
 
 # SAR_numer_threshold = 0
+Sys.setlocale("LC_TIME", "English")
+
+SAR_numer_threshold = 3
+
+
+
+
+
+
+
+obs_df %>%
+  transmute(Date, Data = pos) %>%
+  filter(Date >= as.Date("2020-03-01")) %>%
+  left_join(
+    these_approved_sims %>%
+      # new_sims %>%
+      group_by(seed_index, rep) %>% mutate(not_extinct = any(SAR_numer >= SAR_numer_threshold)) %>% filter(not_extinct) %>% ungroup %>%
+      group_by(Date) %>%
+      summarise(across(contains("detected"), mean))
+  ) %>% 
+  # pivot_longer(-c("Date", "Data"), names_sep = "_", values_to = "Patients", names_to = c("Disease", "Detected")) %>% 
+  pivot_longer(contains("detected"), values_to = "Prevalence", names_to = c("Fate")) %>% 
+  # mutate(Fate = gsub("_", "\n", Fate)) %>% 
+  mutate(Fate = factor(Fate, levels = c("pAsymptomatic_undetected"
+                                        , "pSymptomatic_undetected"
+                                        , "pAsymptomatic_detected"
+                                        , "pSymptomatic_detected"
+                                        # mutate(Fate = factor(Fate, levels = c("pAsymptomatic\nundetected"
+                                        #                                       , "pSymptomatic\nundetected"
+                                        #                                       , "pAsymptomatic\ndetected"
+                                        #                                       , "pSymptomatic\ndetected"
+                                                                              
+  ))) %>% 
+  ggplot(aes(x = as.Date(Date, origin = "1970-01-01"), y = Prevalence, fill = Fate, alpha = Fate)) + geom_area() + 
+  scale_fill_manual(values = c(pAsymptomatic_undetected = "green"
+                               , pSymptomatic_undetected = "blue"
+                               , pAsymptomatic_detected = "green"
+                               , pSymptomatic_detected = "blue")) +
+  scale_alpha_manual(values = c(pAsymptomatic_undetected = 0.3
+                                , pSymptomatic_undetected = 0.3
+                                , pAsymptomatic_detected = 1
+                                , pSymptomatic_detected = 1)) + 
+  labs(x = "", y = "Prevalence", fill = "", alpha = "") +
+  theme_bw() + theme(text = element_text(size = 20)
+                     , legend.text = element_text(size = 10)
+                     , legend.position = c(0.2, 0.80)
+                       , legend.background = element_rect(fill=NA)
+                                                        # size=0.5, linetype="solid"
+                                                        # , colour = "black"
+                     ) + 
+  scale_y_continuous(labels = function(x) scales::percent(x = x, accuracy = 1))
+  # ) #+
+  # geom_segment(x = as.Date("2020-03-23"), xend = as.Date("2020-03-23")
+  #              , y = 150, yend = 130, arrow = arrow(length = unit(0.1, "inches"), ends = "last")) +
+  # geom_text(label = expression(t[inflect]), x = as.Date("2020-03-23"), y = 160, size = 10)
+
+
+ggsave(paste0("~/tars/output/Figs/", "new_sims_inflection_detected", SAR_numer_threshold, ".png"), height = 15, width = 20, units = "cm")
+
+#   geom_bar(aes(y = pos, fill = "pos"), stat = "identity") + 
+#   scale_fill_manual(values = c(pos = "red", neg = "blue")) + 
+#   geom_ribbon(aes(ymin = low_pos, ymax = high_pos), alpha = 0.8, fill = "pink") + 
+
+
 
 
 # obs_df %>% 
@@ -1270,56 +1396,208 @@ best_id = these_approved_sims %>% filter(ll == max(ll)) %>% pull(rep) %>% unique
 #                      )
 # ggsave(paste0("~/Pasteur/tars/output/Figs/", "approved_sims_updated", ".png"), height = 20, width = 20, units = "cm")
 
-Sys.setlocale("LC_TIME", "English")
 
-SAR_numer_threshold = 3
-obs_df %>% 
-  transmute(Date, Data = pos) %>% 
-  filter(Date >= as.Date("2020-03-01")) %>% 
+obs_df %>%
+  transmute(Date, Data = pos) %>%
+  filter(Date >= as.Date("2020-03-01")) %>%
   left_join(
     these_approved_sims %>%
       # new_sims %>%
-      group_by(seed_index, rep) %>% mutate(not_extinct = any(SAR_numer >= SAR_numer_threshold)) %>% filter(not_extinct) %>% ungroup %>% 
-      group_by(Date) %>% 
+      group_by(seed_index, rep) %>% mutate(not_extinct = any(SAR_numer >= SAR_numer_threshold)) %>% filter(not_extinct) %>% ungroup %>%
+      group_by(Date) %>%
       summarise(lowCI = quantile(pos, 0.025)
                 , highCI = quantile(pos, 0.975)
                 , median = quantile(pos, 0.5)
                 , max = quantile(pos, 1)
-      )) %>% 
-  left_join(these_approved_sims %>% filter(rep == best_id) %>% transmute(Date, max_logLik = pos)) %>% 
-  # left_join(mode_curve) %>% 
-  ggplot(aes(x = as.Date(Date, origin = "1970-01-01"))) + 
-  
-  # geom_bar(aes(y = Data, fill = "Data"), stat = "identity") + 
+
+      )) %>%
+  left_join(these_approved_sims %>% filter(rep == best_id) %>% transmute(Date, max_logLik = pos)) %>%
+  # left_join(mode_curve) %>%
+  ggplot(aes(x = as.Date(Date, origin = "1970-01-01"))) +
+
+  # geom_bar(aes(y = Data, fill = "Data"), stat = "identity") +
   geom_ribbon(aes(ymin = lowCI, ymax = highCI), alpha = 0.6, fill = "grey") +
   geom_line(aes(y = highCI, colour = "CI", size = "CI", linetype = "CI")) +
   geom_line(aes(y = lowCI, colour = "CI", size = "CI", linetype = "CI")) +
   # geom_line(aes(y = max_logLik, colour = "bestFit", size = "bestFit", linetype = "bestFit")) +
   geom_line(aes(y = median, colour = "median", size = "median", linetype = "median")) +
-  geom_point(aes(y = Data, colour = "Data", size = "Data", linetype = "Data")) + 
+  geom_point(aes(y = Data, colour = "Data", size = "Data", linetype = "Data")) +
   scale_colour_manual(values = c(  Data = "red"   , bestFit = "blue", median = "black" , mode = "blue", CI = "grey")) +
   scale_linetype_manual(values = c(Data = "blank", bestFit = "dashed", median = "dashed", mode = "dotted", CI = "solid")) +
   scale_size_manual(values = c(    Data = 2       , bestFit = 1, median = 1, mode = 1       , CI = 1)) +
   # guides(fill = "Data") +
-  labs(x = "", y = "Positive tests", linetype = "Simulations", size = "Simulations", colour = "Simulations") + 
+  labs(x = "", y = "Positive tests", linetype = "Simulations", size = "Simulations", colour = "Simulations") +
   theme_bw() + theme(text = element_text(size = 20)
                      , legend.position = "none" #c(0.2, 0.70)
                      , legend.background = element_rect(fill="white",
                                                         size=0.5, linetype="solid"
                                                         # , colour = "black"
                      )
-  ) + 
+  ) +
   geom_segment(x = as.Date("2020-03-23"), xend = as.Date("2020-03-23")
                , y = 21, yend = 15, arrow = arrow(length = unit(0.1, "inches"), ends = "last")) +
-  geom_text(label = expression(t[inflect]), x = as.Date("2020-03-23"), y = 22, size = 10) + 
+  geom_text(label = expression(t[inflect]), x = as.Date("2020-03-23"), y = 22, size = 10) +
   coord_cartesian(ylim = c(0, 32))
 
-ggsave(paste0("~/tars/output/Figs/", "new_sims_inflection", ".png"), height = 20, width = 20, units = "cm")
+ggsave(paste0("~/tars/output/Figs/", "new_sims_inflection", SAR_numer_threshold, ".png"), height = 20, width = 20, units = "cm")
 
 
-#   geom_bar(aes(y = pos, fill = "pos"), stat = "identity") + 
-#   scale_fill_manual(values = c(pos = "red", neg = "blue")) + 
-#   geom_ribbon(aes(ymin = low_pos, ymax = high_pos), alpha = 0.8, fill = "pink") + 
+obs_df %>%
+  transmute(Date, Data = pos) %>%
+  filter(Date >= as.Date("2020-03-01")) %>%
+  left_join(
+    these_approved_sims %>%
+      # new_sims %>%
+      group_by(seed_index, rep) %>% mutate(not_extinct = any(SAR_numer >= SAR_numer_threshold)) %>% filter(not_extinct) %>% ungroup %>%
+      group_by(Date) %>%
+      # summarise(lowCI = quantile(pos, 0.025)
+      #           , highCI = quantile(pos, 0.975)
+      #           , median = quantile(pos, 0.5)
+      #           , max = quantile(pos, 1)
+      summarise(lowCI = quantile(SAR_numer, 0.025)
+                , highCI = quantile(SAR_numer, 0.975)
+                , median = quantile(SAR_numer, 0.5)
+                , max = quantile(SAR_numer, 1)
+      )) %>%
+  left_join(these_approved_sims %>% filter(rep == best_id) %>% transmute(Date, max_logLik = pos)) %>%
+  # left_join(mode_curve) %>%
+  ggplot(aes(x = as.Date(Date, origin = "1970-01-01"))) +
+  
+  # geom_bar(aes(y = Data, fill = "Data"), stat = "identity") +
+  geom_ribbon(aes(ymin = lowCI, ymax = highCI), alpha = 0.6, fill = "grey") +
+  geom_line(aes(y = highCI, colour = "CI", size = "CI", linetype = "CI")) +
+  geom_line(aes(y = lowCI, colour = "CI", size = "CI", linetype = "CI")) +
+  # geom_line(aes(y = max_logLik, colour = "bestFit", size = "bestFit", linetype = "bestFit")) +
+  geom_line(aes(y = median, colour = "median", size = "median", linetype = "median")) +
+  # geom_point(aes(y = Data, colour = "Data", size = "Data", linetype = "Data")) +
+  scale_colour_manual(values = c(  Data = "red"   , bestFit = "blue", median = "black" , mode = "blue", CI = "grey")) +
+  scale_linetype_manual(values = c(Data = "blank", bestFit = "dashed", median = "dashed", mode = "dotted", CI = "solid")) +
+  scale_size_manual(values = c(    Data = 2       , bestFit = 1, median = 1, mode = 1       , CI = 1)) +
+  # guides(fill = "Data") +
+  labs(x = "", y = "Cumulative incident cases", linetype = "Simulations", size = "Simulations", colour = "Simulations") +
+  theme_bw() + theme(text = element_text(size = 20)
+                     , legend.position = "none" #c(0.2, 0.70)
+                     , legend.background = element_rect(fill="white",
+                                                        size=0.5, linetype="solid"
+                                                        # , colour = "black"
+                     )
+  ) +
+  geom_segment(x = as.Date("2020-03-23"), xend = as.Date("2020-03-23")
+               , y = 150, yend = 110, arrow = arrow(length = unit(0.1, "inches"), ends = "last")) +
+  geom_text(label = expression(t[inflect]), x = as.Date("2020-03-23"), y = 180, size = 10)
+
+
+ggsave(paste0("~/tars/output/Figs/", "new_sims_inflection_cumInc", SAR_numer_threshold, ".png"), height = 20, width = 20, units = "cm")
+
+r = 1
+
+extra_pos = obs_df[0, ]
+for(r in 1:nrow(obs_df %>% 
+  filter(pos > 0))){
+  
+  this_line <- obs_df %>% 
+    filter(pos > 0) %>% 
+    {.[r, ]}
+  
+  extra_pos <- rbind(extra_pos
+                     ,  tibble(this_line, .rows = this_line$pos) %>% 
+    mutate(pos = 1:n())
+  )
+  
+}
+extra_pos <- extra_pos %>% transmute(Date, Data = pos)
+
+obs_df %>%
+  transmute(Date, Data = pos) %>%
+  filter(Date >= as.Date("2020-03-01")) %>%
+  left_join(
+    these_approved_sims %>%
+      # new_sims %>%
+      group_by(seed_index, rep) %>% mutate(not_extinct = any(SAR_numer >= SAR_numer_threshold)) %>% filter(not_extinct) %>% ungroup %>%
+      group_by(Date) %>%
+      summarise(lowCI = quantile(DailyInc, 0.025)
+                , highCI = quantile(DailyInc, 0.975)
+                , median = quantile(DailyInc, 0.5)
+                , max = quantile(DailyInc, 1)
+      )) %>%
+  left_join(these_approved_sims %>% filter(rep == best_id) %>% transmute(Date, max_logLik = pos)) %>%
+  # left_join(mode_curve) %>%
+  ggplot(aes(x = as.Date(Date, origin = "1970-01-01"))) +
+  
+  # geom_bar(aes(y = Data, fill = "Data"), stat = "identity") +
+  geom_ribbon(aes(ymin = lowCI, ymax = highCI), alpha = 0.6, fill = "grey") +
+  geom_line(aes(y = highCI, colour = "CI", size = "CI", linetype = "CI")) +
+  geom_line(aes(y = lowCI, colour = "CI", size = "CI", linetype = "CI")) +
+  # geom_line(aes(y = max_logLik, colour = "bestFit", size = "bestFit", linetype = "bestFit")) +
+  geom_line(aes(y = median, colour = "median", size = "median", linetype = "median")) +
+  geom_point(aes(y = Data, colour = "Data", size = "Data", linetype = "Data"), data = extra_pos, size = 1) +
+  scale_colour_manual(values = c(  Data = "red"   , bestFit = "blue", median = "black" , mode = "blue", CI = "grey")) +
+  scale_linetype_manual(values = c(Data = "blank", bestFit = "dashed", median = "dashed", mode = "dotted", CI = "solid")) +
+  scale_size_manual(values = c(    Data = 2       , bestFit = 1, median = 1, mode = 1       , CI = 1)) +
+  # guides(fill = "Data") +
+  labs(x = "", y = "Incident cases", linetype = "Simulations", size = "Simulations", colour = "Simulations") +
+  theme_bw() + theme(text = element_text(size = 20)
+                     , legend.position = "none" #c(0.2, 0.70)
+                     , legend.background = element_rect(fill="white",
+                                                        size=0.5, linetype="solid"
+                                                        # , colour = "black"
+                     )
+  ) +
+  geom_segment(x = as.Date("2020-03-23"), xend = as.Date("2020-03-23")
+               , y = 25, yend = 20, arrow = arrow(length = unit(0.1, "inches"), ends = "last")) +
+  geom_text(label = expression(t[inflect]), x = as.Date("2020-03-23"), y = 30, size = 10)
+
+
+ggsave(paste0("~/tars/output/Figs/", "new_sims_inflection_Inc", SAR_numer_threshold, ".png"), height = 20, width = 20, units = "cm")
+
+
+
+obs_df %>%
+  transmute(Date, Data = pos) %>%
+  filter(Date >= as.Date("2020-03-01")) %>%
+  left_join(
+    these_approved_sims %>%
+      # new_sims %>%
+      group_by(seed_index, rep) %>% mutate(not_extinct = any(SAR_numer >= SAR_numer_threshold)) %>% filter(not_extinct) %>% ungroup %>%
+      group_by(Date) %>%
+      summarise(lowCI = quantile(Ninfected/N, 0.025)
+                , highCI = quantile(Ninfected/N, 0.975)
+                , median = quantile(Ninfected/N, 0.5)
+                , max = quantile(Ninfected/N, 1)
+      )) %>%
+  left_join(these_approved_sims %>% filter(rep == best_id) %>% transmute(Date, max_logLik = pos)) %>%
+  # left_join(mode_curve) %>%
+  ggplot(aes(x = as.Date(Date, origin = "1970-01-01"))) +
+  
+  # geom_bar(aes(y = Data, fill = "Data"), stat = "identity") +
+  geom_ribbon(aes(ymin = lowCI, ymax = highCI), alpha = 0.6, fill = "grey") +
+  geom_line(aes(y = highCI, colour = "CI", size = "CI", linetype = "CI")) +
+  geom_line(aes(y = lowCI, colour = "CI", size = "CI", linetype = "CI")) +
+  # geom_line(aes(y = max_logLik, colour = "bestFit", size = "bestFit", linetype = "bestFit")) +
+  geom_line(aes(y = median, colour = "median", size = "median", linetype = "median")) +
+  # geom_point(aes(y = Data, colour = "Data", size = "Data", linetype = "Data")) +
+  scale_colour_manual(values = c(  Data = "red"   , bestFit = "blue", median = "black" , mode = "blue", CI = "grey")) +
+  scale_linetype_manual(values = c(Data = "blank", bestFit = "dashed", median = "dashed", mode = "dotted", CI = "solid")) +
+  scale_size_manual(values = c(    Data = 2       , bestFit = 1, median = 1, mode = 1       , CI = 1)) +
+  # guides(fill = "Data") +
+  labs(x = "", y = "Prevalence", linetype = "Simulations", size = "Simulations", colour = "Simulations") +
+  theme_bw() + theme(text = element_text(size = 20)
+                     , legend.position = "none" #c(0.2, 0.70)
+                     , legend.background = element_rect(fill="white",
+                                                        size=0.5, linetype="solid"
+                                                        # , colour = "black"
+                     )
+  ) +
+  geom_segment(x = as.Date("2020-03-23"), xend = as.Date("2020-03-23")
+               , y = 0.38, yend = 0.30, arrow = arrow(length = unit(0.1, "inches"), ends = "last")) +
+  geom_text(label = expression(t[inflect]), x = as.Date("2020-03-23"), y = 0.45, size = 10) +
+  scale_y_continuous(labels = scales::percent)
+
+
+ggsave(paste0("~/tars/output/Figs/", "new_sims_inflection_Prev", SAR_numer_threshold, ".png"), height = 20, width = 20, units = "cm")
+
+
+
 
 
 

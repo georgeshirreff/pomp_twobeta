@@ -100,11 +100,30 @@ pomp_sim_distribution <- function(pompModel, param_df, NSIM = 10, SAR_numer_thre
       filter(not_extinct) %>% 
       ungroup %>% 
       select(-not_extinct) %>% 
+
+      mutate(pAsymptomatic_undetected = (Ea + Ia + EaT*(1-pompModel@params["Zea"]) + IaT*(1-pompModel@params["Zia"]))/N
+             , pSymptomatic_undetected = (Es + Is + EsT*(1-pompModel@params["Zes"]) + IsT*(1-pompModel@params["Zis"]))/N
+             , pAsymptomatic_detected = (EaT*pompModel@params["Zea"] + IaT*pompModel@params["Zia"])/N
+             , pSymptomatic_detected = (EsT*pompModel@params["Zes"] + IsT*pompModel@params["Zis"])/N
+      ) %>% 
+
       group_by(Date) %>% 
       summarise(lowCI = quantile(pos, 0.025)
                 , highCI = quantile(pos, 0.975)
                 , median = quantile(pos, 0.5)
-                , max = quantile(pos, 1)) %>% 
+                , max = quantile(pos, 1)
+                # , pAsymptomatic_undetected = median(pAsymptomatic_undetected)
+                # , pSymptomatic_undetected = median(pAsymptomatic_undetected)
+                # , pAsymptomatic_detected = median(pAsymptomatic_detected)
+                # , pSymptomatic_detected = median(pAsymptomatic_detected)
+                , pAsymptomatic_undetected = mean(pAsymptomatic_undetected)
+                , pSymptomatic_undetected = mean(pAsymptomatic_undetected)
+                , pAsymptomatic_detected = mean(pAsymptomatic_detected)
+                , pSymptomatic_detected = mean(pAsymptomatic_detected)
+                , Ninfected_median = median(Ninfected)
+                , Ninfected_mean = mean(Ninfected)
+                
+                ) %>% 
       left_join(obs_df %>% transmute(Date, Data = pos))
     
   }
@@ -113,11 +132,11 @@ pomp_sim_distribution <- function(pompModel, param_df, NSIM = 10, SAR_numer_thre
   
 }
 
-pomp_sim_plot <- function(res_ward, pompModel_source, NSIM = 10, SAR_numer_threshold = 3, calculate_logLik = F){
+pomp_sim_plot <- function(res_ward, pompModel_source, NSIM = 10, SAR_numer_threshold = 3, detection_plot = F, calculate_logLik = F){
 
   sim_distribution_df = NULL
   wardLetter = "A"
-  floor = 0
+  floor = 2
   for(wardLetter in c("A", "B", "C")){
     # print(wardLetter)
     
@@ -162,7 +181,39 @@ pomp_sim_plot <- function(res_ward, pompModel_source, NSIM = 10, SAR_numer_thres
   
   print(c("calculate_loglik", calculate_logLik))
   
-  if(!calculate_logLik){
+  if(detection_plot){
+    
+    sim_plot = sim_distribution_df %>% 
+      filter(Date > as.Date("2020-03-01")) %>% 
+      pivot_longer(contains("detected"), values_to = "Prevalence", names_to = c("Fate")) %>% 
+      # mutate(Fate = gsub("_", "\n", Fate)) %>% 
+      mutate(Fate = factor(Fate, levels = c("pAsymptomatic_undetected"
+                                            , "pSymptomatic_undetected"
+                                            , "pAsymptomatic_detected"
+                                            , "pSymptomatic_detected"
+      ))) %>% 
+      ggplot(aes(x = as.Date(Date, origin = "1970-01-01"), y = Prevalence, fill = Fate, alpha = Fate)) + geom_area() + 
+      scale_fill_manual(values = c(pAsymptomatic_undetected = "green"
+                                   , pSymptomatic_undetected = "blue"
+                                   , pAsymptomatic_detected = "green"
+                                   , pSymptomatic_detected = "blue")) +
+      scale_alpha_manual(values = c(pAsymptomatic_undetected = 0.3
+                                    , pSymptomatic_undetected = 0.3
+                                    , pAsymptomatic_detected = 1
+                                    , pSymptomatic_detected = 1)) + 
+      labs(x = "", y = "Prevalence", fill = "", alpha = "") +
+      theme_bw() + theme(text = element_text(size = 20)
+                         , legend.text = element_text(size = 10)
+                         # , legend.position = c(0.2, 0.80)
+                         , legend.background = element_rect(fill=NA)
+                         # size=0.5, linetype="solid"
+                         # , colour = "black"
+      ) + 
+      scale_y_continuous(labels = function(x) scales::percent(x = x, accuracy = 1)) + 
+      facet_wrap(.~wardCode, scales = "free_y")
+      
+  }
+  else if(!calculate_logLik){
     sim_plot = sim_distribution_df %>% 
       filter(Date > as.Date("2020-03-01")) %>% 
       ggplot(aes(x = as.Date(Date, origin = "1970-01-01"))) + 

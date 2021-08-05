@@ -1077,8 +1077,8 @@ res <- res %>%
 #   filter(Date >= as.numeric(as.Date("2020-02-01"))
 #          , Date <= as.numeric(as.Date("2020-04-30")))
 
-# source("~/pomp_twobeta/seirInflect_source.R")
-source("~/pomp_twobeta/seirInflect_source_inc.R")
+source("~/pomp_twobeta/seirInflect_source.R")
+# source("~/pomp_twobeta/seirInflect_source_inc.R")
 
 best_params = res %>% 
   select(seirInflect@params %>% names, starts_with("loglik")) %>% 
@@ -1203,10 +1203,15 @@ for(i in 1:NSETS){
                                                                                    # , Ia, Is, IaT, IsT
                                                                                    # , N
                                                                                    
-                                                                                   , pAsymptomatic_undetected = (Ea + Ia + EaT*(1-seirInflect@params["Zea"]) + IaT*(1-seirInflect@params["Zia"]))/N
-                                                                                   , pSymptomatic_undetected = (Es + Is + EsT*(1-seirInflect@params["Zes"]) + IsT*(1-seirInflect@params["Zis"]))/N
-                                                                                   , pAsymptomatic_detected = (EaT*seirInflect@params["Zea"] + IaT*seirInflect@params["Zia"])/N
-                                                                                   , pSymptomatic_detected = (EsT*seirInflect@params["Zes"] + IsT*seirInflect@params["Zis"])/N
+                                                                                   # , pAsymptomatic_undetected = (Ea + Ia + EaT*(1-seirInflect@params["Zea"]) + IaT*(1-seirInflect@params["Zia"]))/N
+                                                                                   # , pSymptomatic_undetected = (Es + Is + EsT*(1-seirInflect@params["Zes"]) + IsT*(1-seirInflect@params["Zis"]))/N
+                                                                                   # , pAsymptomatic_detected = (EaT*seirInflect@params["Zea"] + IaT*seirInflect@params["Zia"])/N
+                                                                                   # , pSymptomatic_detected = (EsT*seirInflect@params["Zes"] + IsT*seirInflect@params["Zis"])/N
+                                                                                   
+                                                                                   , pAsymptomatic_undetected = (Ea + Ia + EaT*(1-seirInflect@params["Zea"]) + IaT*(1-seirInflect@params["Zia"]))
+                                                                                   , pSymptomatic_undetected = (Es + Is + EsT*(1-seirInflect@params["Zes"]) + IsT*(1-seirInflect@params["Zis"]))
+                                                                                   , pAsymptomatic_detected = (EaT*seirInflect@params["Zea"] + IaT*seirInflect@params["Zia"])
+                                                                                   , pSymptomatic_detected = (EsT*seirInflect@params["Zes"] + IsT*seirInflect@params["Zis"])
                                                                                    
                                                                                    
                                                                                    
@@ -1284,7 +1289,7 @@ obs_df %>%
       # new_sims %>%
       group_by(seed_index, rep) %>% mutate(not_extinct = any(SAR_numer >= SAR_numer_threshold)) %>% filter(not_extinct) %>% ungroup %>%
       group_by(Date) %>%
-      summarise(across(contains("detected"), mean))
+      summarise(across(contains("detected"), median))
   ) %>% 
   # pivot_longer(-c("Date", "Data"), names_sep = "_", values_to = "Patients", names_to = c("Disease", "Detected")) %>% 
   pivot_longer(contains("detected"), values_to = "Prevalence", names_to = c("Fate")) %>% 
@@ -1308,28 +1313,58 @@ obs_df %>%
                                 , pSymptomatic_undetected = 0.3
                                 , pAsymptomatic_detected = 1
                                 , pSymptomatic_detected = 1)) + 
-  labs(x = "", y = "Prevalence", fill = "", alpha = "") +
+  labs(x = "", y = "Prevalent cases", fill = "", alpha = "") +
   theme_bw() + theme(text = element_text(size = 20)
                      , legend.text = element_text(size = 10)
                      , legend.position = c(0.2, 0.80)
                        , legend.background = element_rect(fill=NA)
                                                         # size=0.5, linetype="solid"
                                                         # , colour = "black"
-                     ) + 
-  scale_y_continuous(labels = function(x) scales::percent(x = x, accuracy = 1))
+                     ) ##+ 
+  # scale_y_continuous(labels = function(x) scales::percent(x = x, accuracy = 1))
   # ) #+
   # geom_segment(x = as.Date("2020-03-23"), xend = as.Date("2020-03-23")
   #              , y = 150, yend = 130, arrow = arrow(length = unit(0.1, "inches"), ends = "last")) +
   # geom_text(label = expression(t[inflect]), x = as.Date("2020-03-23"), y = 160, size = 10)
 
 
-ggsave(paste0("~/tars/output/Figs/", "new_sims_inflection_detected", SAR_numer_threshold, ".png"), height = 15, width = 20, units = "cm")
+ggsave(paste0("~/tars/output/Figs/", "new_sims_inflection_detected", SAR_numer_threshold, ".png")
+       # , height = 15, width = 20, units = "cm"
+       , height = 15*8.5/20, width = 8.5, units = "cm", scale = 20/8.5, dpi = 300
+       )
 
 #   geom_bar(aes(y = pos, fill = "pos"), stat = "identity") + 
 #   scale_fill_manual(values = c(pos = "red", neg = "blue")) + 
 #   geom_ribbon(aes(ymin = low_pos, ymax = high_pos), alpha = 0.8, fill = "pink") + 
 
-
+obs_df %>%
+  transmute(Date, Data = pos) %>%
+  filter(Date >= as.Date("2020-03-01")) %>%
+  left_join(
+    these_approved_sims %>%
+      # new_sims %>%
+      group_by(seed_index, rep) %>% mutate(not_extinct = any(SAR_numer >= SAR_numer_threshold)) %>% filter(not_extinct) %>% ungroup %>%
+      group_by(Date) %>%
+      summarise(across(contains("detected"), mean))
+  ) %>% 
+  mutate(p = (pAsymptomatic_undetected + pSymptomatic_undetected + pAsymptomatic_detected + pSymptomatic_detected)
+         , pUndetected = (pAsymptomatic_undetected + pSymptomatic_undetected) / p)
+  
+obs_df %>%
+  transmute(Date, Data = pos) %>%
+  filter(Date >= as.Date("2020-03-01")) %>%
+  left_join(
+    these_approved_sims %>%
+      # new_sims %>%
+      group_by(seed_index, rep) %>% mutate(not_extinct = any(SAR_numer >= SAR_numer_threshold)) %>% filter(not_extinct) %>% ungroup %>%
+      mutate(p = (pAsymptomatic_undetected + pSymptomatic_undetected + pAsymptomatic_detected + pSymptomatic_detected)
+             , U = (pAsymptomatic_undetected + pSymptomatic_undetected)) %>% 
+      group_by(Date) %>%
+      summarise(p = median(p)
+                , pUndetected = median(U/p, na.rm = T))
+  ) %>% 
+  mutate(p = (pAsymptomatic_undetected + pSymptomatic_undetected + pAsymptomatic_detected + pSymptomatic_detected)
+         , pUndetected = (pAsymptomatic_undetected + pSymptomatic_undetected) / p)
 
 
 # obs_df %>% 

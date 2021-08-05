@@ -1,0 +1,50 @@
+Preparing the data
+	Project ReneMuret\Data
+	posneg_alltests.csv
+	posneg_alltests_<building>_<floor>.csv
+	
+Final analyses
+	Whole hospital analysis
+		seirInflect_tinit_beta2.R
+		parallel_seirInflect_tinit.sh
+		seirInflect_tinit_beta1profile.R
+		parallel_seirInflect_tinit_b1p.sh
+	Ward analysis
+		seirRefresh_ALLward_tinit_abs.R
+		seirRefresh_ALLward_betaprofile_tinit.R (didn't need abs as not searching for beta)
+		parallel_seirRefresh_ALLward_tinit.sh
+		
+	Validation
+		make_Refresh_valid2param_tinit_table.R
+		seirRefresh_validation_2param_tinit_beta0.01.csv
+		seirRefresh_valid2param.R
+		parallel_seirRefresh_valid2.sh
+		
+		make_valid3param_table.R
+		validation_table_3param_tinit_tinflect23.csv
+		seirInflect_valid3param.R
+		parallel_validate3param_tinit_seirInflect.sh
+	
+	Sensitivity analysis
+		sensAnalysis_scenarios_v5.xlsx
+		seirInflect_tinit_beta2_sensAnalysis.R
+		parallel_seirInflect_tinit_sensAnal.sh
+		
+		
+		
+Processing
+	examine_seirInflect_tinflect23.R
+	bias_test_refresh.R
+
+
+Visualisations
+	Whole hospital	
+		examine_seirInflect_tinflect23.R
+		compare_one_two_model_fits.R
+	Wards
+		compare_ward_models.R
+		sim_plot_wards.R
+	Sens analysis 
+		ward_growth_sensAnal_plots.R
+	Additional
+		illustrate_inflection_model.R

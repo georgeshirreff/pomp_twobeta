@@ -101,10 +101,10 @@ pomp_sim_distribution <- function(pompModel, param_df, NSIM = 10, SAR_numer_thre
       ungroup %>% 
       select(-not_extinct) %>% 
 
-      mutate(pAsymptomatic_undetected = (Ea + Ia + EaT*(1-pompModel@params["Zea"]) + IaT*(1-pompModel@params["Zia"]))/N
-             , pSymptomatic_undetected = (Es + Is + EsT*(1-pompModel@params["Zes"]) + IsT*(1-pompModel@params["Zis"]))/N
-             , pAsymptomatic_detected = (EaT*pompModel@params["Zea"] + IaT*pompModel@params["Zia"])/N
-             , pSymptomatic_detected = (EsT*pompModel@params["Zes"] + IsT*pompModel@params["Zis"])/N
+      mutate(pAsymptomatic_undetected = (Ea + Ia + EaT*(1-pompModel@params["Zea"]) + IaT*(1-pompModel@params["Zia"]))
+             , pSymptomatic_undetected = (Es + Is + EsT*(1-pompModel@params["Zes"]) + IsT*(1-pompModel@params["Zis"]))
+             , pAsymptomatic_detected = (EaT*pompModel@params["Zea"] + IaT*pompModel@params["Zia"])
+             , pSymptomatic_detected = (EsT*pompModel@params["Zes"] + IsT*pompModel@params["Zis"])
       ) %>% 
 
       group_by(Date) %>% 
@@ -112,14 +112,14 @@ pomp_sim_distribution <- function(pompModel, param_df, NSIM = 10, SAR_numer_thre
                 , highCI = quantile(pos, 0.975)
                 , median = quantile(pos, 0.5)
                 , max = quantile(pos, 1)
-                # , pAsymptomatic_undetected = median(pAsymptomatic_undetected)
-                # , pSymptomatic_undetected = median(pAsymptomatic_undetected)
-                # , pAsymptomatic_detected = median(pAsymptomatic_detected)
-                # , pSymptomatic_detected = median(pAsymptomatic_detected)
-                , pAsymptomatic_undetected = mean(pAsymptomatic_undetected)
-                , pSymptomatic_undetected = mean(pAsymptomatic_undetected)
-                , pAsymptomatic_detected = mean(pAsymptomatic_detected)
-                , pSymptomatic_detected = mean(pAsymptomatic_detected)
+                , pAsymptomatic_undetected = median(pAsymptomatic_undetected)
+                , pSymptomatic_undetected = median(pAsymptomatic_undetected)
+                , pAsymptomatic_detected = median(pAsymptomatic_detected)
+                , pSymptomatic_detected = median(pAsymptomatic_detected)
+                # , pAsymptomatic_undetected = mean(pAsymptomatic_undetected)
+                # , pSymptomatic_undetected = mean(pAsymptomatic_undetected)
+                # , pAsymptomatic_detected = mean(pAsymptomatic_detected)
+                # , pSymptomatic_detected = mean(pAsymptomatic_detected)
                 , Ninfected_median = median(Ninfected)
                 , Ninfected_mean = mean(Ninfected)
                 
@@ -201,7 +201,7 @@ pomp_sim_plot <- function(res_ward, pompModel_source, NSIM = 10, SAR_numer_thres
                                     , pSymptomatic_undetected = 0.3
                                     , pAsymptomatic_detected = 1
                                     , pSymptomatic_detected = 1)) + 
-      labs(x = "", y = "Prevalence", fill = "", alpha = "") +
+      labs(x = "", y = "Prevalent cases", fill = "", alpha = "") +
       theme_bw() + theme(text = element_text(size = 20)
                          , legend.text = element_text(size = 10)
                          # , legend.position = c(0.2, 0.80)
@@ -209,7 +209,7 @@ pomp_sim_plot <- function(res_ward, pompModel_source, NSIM = 10, SAR_numer_thres
                          # size=0.5, linetype="solid"
                          # , colour = "black"
       ) + 
-      scale_y_continuous(labels = function(x) scales::percent(x = x, accuracy = 1)) + 
+      # scale_y_continuous(labels = function(x) scales::percent(x = x, accuracy = 1)) + 
       facet_wrap(.~wardCode, scales = "free_y")
       
   }

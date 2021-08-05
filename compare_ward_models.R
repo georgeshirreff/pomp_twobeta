@@ -231,7 +231,10 @@ ward_sim_plot3 <- pomp_sim_plot(res_ward = res_ward_refresh
                                 , calculate_logLik = F)
 
 ggsave(ward_sim_plot, filename = paste0("~/tars/output/Wards/", exp_name, "_simplot0.png"), units = "cm", width = 40, height = 20)
-ggsave(ward_sim_plot3 + theme(axis.text.x = element_text(angle = 0)), filename = paste0("~/tars/output/Wards/", exp_name, "_simplot3.png"), units = "cm", width = 40, height = 20)
+ggsave(ward_sim_plot3 + theme(axis.text.x = element_text(angle = 0)), filename = paste0("~/tars/output/Wards/", exp_name, "_simplot3.png")
+       # , units = "cm", width = 40, height = 20
+       , height = 8.5, width = 17, units = "cm", scale = 40/17, dpi = 300
+       )
 
 ward_sim_prev_plot0 <- pomp_sim_plot(res_ward = res_ward_refresh
                                      , pompModel_source = "~/R code/seirRefresh_source_ward.R"
@@ -240,7 +243,7 @@ ward_sim_prev_plot0 <- pomp_sim_plot(res_ward = res_ward_refresh
                                      , detection_plot = T
                                      , calculate_logLik = F)
 
-ggsave(ward_sim_prev_plot0, filename = paste0("~/tars/output/Wards/", exp_name, "_simprevplot0 - mean.png"), units = "cm", width = 40, height = 20)
+ggsave(ward_sim_prev_plot0, filename = paste0("~/tars/output/Wards/", exp_name, "_simprevplot0.png"), units = "cm", width = 40, height = 20)
 
 ward_sim_prev_plot3 <- pomp_sim_plot(res_ward = res_ward_refresh
                                      , pompModel_source = "~/R code/seirRefresh_source_ward.R"
@@ -249,7 +252,10 @@ ward_sim_prev_plot3 <- pomp_sim_plot(res_ward = res_ward_refresh
                                      , detection_plot = T
                                      , calculate_logLik = F)
 
-ggsave(ward_sim_prev_plot3, filename = paste0("~/tars/output/Wards/", exp_name, "_simprevplot3 - mean.png"), units = "cm", width = 40, height = 20)
+ggsave(ward_sim_prev_plot3, filename = paste0("~/tars/output/Wards/", exp_name, "_simprevplot3.png")
+       # , units = "cm", width = 40, height = 20
+       , height = 8.5, width = 17, units = "cm", scale = 40/17, dpi = 300
+       )
 
 
 res_ward_refresh %>%

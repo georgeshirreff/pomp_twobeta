@@ -1328,8 +1328,9 @@ obs_df %>%
   # geom_text(label = expression(t[inflect]), x = as.Date("2020-03-23"), y = 160, size = 10)
 
 
-ggsave(paste0("~/tars/output/Figs/", "new_sims_inflection_detected", SAR_numer_threshold, ".png")
+ggsave(paste0("~/tars/output/Figs/", "new_sims_inflection_detected", SAR_numer_threshold, ".pdf")
        # , height = 15, width = 20, units = "cm"
+       , device = "pdf"
        , height = 15*8.5/20, width = 8.5, units = "cm", scale = 20/8.5, dpi = 300
        )
 

@@ -206,7 +206,8 @@ ggsave(paste0("~/Pasteur/tars/output/Inflection/", "validation_", experiment_nam
 experiment_name = "posneg Inflect valid3param tinit extinction_threshold0 tinflect23"
 
 res <- read_delim(paste0("~/tars/output/TOY/cat/BiasTest_seirInflect_", experiment_name, ".csv"), delim = ";") %>% 
-  mutate(across(contains("t_"), function(x) as.Date(x, origin = "1970-01-01")))
+  # mutate(across(contains("t_"), function(x) as.Date(x, origin = "1970-01-01")))
+mutate(across(contains("t_"), function(x) as.numeric(x - as.numeric(as.Date("2020-03-11")))))
 
 
 # e = "beta1"
@@ -219,14 +220,26 @@ res <- read_delim(paste0("~/tars/output/TOY/cat/BiasTest_seirInflect_", experime
 
 
 upper_limits <- list(beta1 = c(NA, 5), beta2 = c(NA, 5), beta_factor = c(NA, 5), E_init = c(0.1, 100)
-                     , t_init = as.Date(c("2020-02-01", "2020-05-01"))
-                     , t_inflect = as.Date(c("2020-02-01", "2020-05-01"))
+                     # , t_init = as.Date(c("2020-02-01", "2020-05-01"))
+                     # , t_inflect = as.Date(c("2020-02-01", "2020-05-01"))
+                     , t_init = c(-39, 51)
+                     , t_inflect = c(-39, 51)
 )
 
 pls <- list()
 e = "beta2"
-true_labels = c(beta1 = expression(true~beta[1]), beta2 = expression(true~beta[2]), E_init = expression(true~E[init]))
-est_labels = c(beta1 = expression(estimate~beta[1]), beta2 = expression(estimate~beta[2]), E_init = expression(estimate~E[init]))
+true_labels = c(beta1 = expression(true~beta[1])
+                , beta2 = expression(true~beta[2])
+                , E_init = expression(true~E[init])
+                , t_init = expression(true~t[init]~relative)
+                , t_inflecgt = expression(true~t[inflect]~relative)
+                )
+est_labels = c(beta1 = expression(estimate~beta[1])
+               , beta2 = expression(estimate~beta[2])
+               , E_init = expression(estimate~E[init])
+               , t_init = expression(estimate~t[init]~relative)
+               , t_inflect = expression(estimate~t[inflect]~relative)
+               )
 
 e = 't_init'
 for(e in c("beta1", "beta2"
@@ -257,10 +270,13 @@ for(e in c("beta1", "beta2"
 }
 
 
-pls[["E_init"]] = pls[["E_init"]] + scale_x_log10() + scale_y_log10() + coord_cartesian(ylim = c(1, 100))
+# pls[["E_init"]] = pls[["E_init"]] + scale_x_log10() + scale_y_log10() + coord_cartesian(ylim = c(1, 100))
 ggpubr::ggarrange(plotlist = pls, ncol = 3)
 
-ggsave(paste0("~/tars/output/Figs/", "validation_", experiment_name, ".png"), units = "cm", width = 30, height = 12)
+# ggsave(paste0("~/tars/output/Figs/", "validation_", experiment_name, ".png"), units = "cm", width = 30, height = 12)
+
+ggsave(paste0("~/tars/output/Figs/", "validation_", experiment_name, "_relative.png"), units = "cm", width = 30, height = 12)
+
 
 experiment_name = "posneg Inflect valid3param beta2"
 experiment_name = "posneg Inflect valid3param longcoldbeta2"

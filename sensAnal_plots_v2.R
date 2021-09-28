@@ -17,21 +17,25 @@ experiment_name = "posneg Inflect beta2 sensAnal"
 # model = "seirRefresh_"
 model = "seirInflect_"
 
-sA <- read_csv(paste0("~/Pasteur/tars/output/TOY/cat/", model, experiment_name, ".csv" )) %>% 
+sA <- read_csv(paste0("~/tars/output/TOY/cat/", model, experiment_name, ".csv" )) %>% 
   mutate_at(c("t_inflect", "t_init"), function(x) as.Date(x, origin = "1970-01-01")) %>% 
   # mutate(R0 = beta*(psi*(1/gamma*epsilon + 1/(delta)) + kappa1*(1-psi)*(1/(gamma*kappa2)*epsilon + 1/delta)))
   mutate(R0_before = beta1*(psi*(1/gamma*epsilon + 1/(delta)) + kappa1*(1-psi)*(1/(gamma*kappa2)*epsilon + 1/(delta*kappa3)))
          , R0_after = beta2*(psi*(1/gamma*epsilon + 1/(delta)) + kappa1*(1-psi)*(1/(gamma*kappa2)*epsilon + 1/(delta*kappa3))))
 
 
-sa_scen <- read_csv("~/Pasteur/tars/input/sensAnalysis/sensAnalysis_scenarios_v5.csv") %>% 
+sa_scen <- read_csv("~/tars/input/sensAnalysis/sensAnalysis_scenarios_v5.csv") %>% 
   mutate(t_inflect = as.numeric(t_inflect))
 # sa_scen <- read_csv("~/Pasteur/tars/input/sensAnalysis/sensAnalysis_scenarios_v4.csv")
 
+sa_scen %>% View
 
 sA <- sA %>% 
   left_join(sa_scen %>% select(-beta1, -beta2, -t_init) %>% 
-              mutate(t_inflect = as.Date(t_inflect, origin = "1970-01-01")))
+              mutate(t_inflect = as.Date(t_inflect, origin = "1970-01-01"))) %>% 
+  mutate(across(contains(c("t_in")), function(x) round(as.numeric(x - as.numeric(as.Date("2020-03-11")))))) %>% 
+  mutate(across(contains(c("tinit")), function(x) round(as.numeric(x - as.numeric(as.Date("2020-03-11"))))))
+
 
 # deal with some which are missing
 sA$scenario_number[sA$Ze == 0.6 & sA$Zrp == 0.6] = 19
@@ -47,6 +51,8 @@ sA$scenario_number %>% table(useNA = "always")
 baseline_values <- sa_scen %>% 
   filter(scenario_name == "baseline") %>% 
   dplyr::select(-scenario_name, -scenario_number) %>% 
+  mutate(across(contains(c("t_inflect")), function(x) round(as.numeric(x - as.numeric(as.Date("2020-03-11")))))) %>% 
+  
   # mutate(t_inflect = as.numeric(t_inflect)) %>% 
   t %>% 
   {tibble(var = rownames(.), baseline = as.numeric(.[, 1]))} %>% 
@@ -62,6 +68,7 @@ baseline_values %>% print(n = 1000)
 
 var_values <-
   sa_scen %>% 
+  mutate(across(contains(c("t_inflect")), function(x) round(as.numeric(x - as.numeric(as.Date("2020-03-11")))))) %>% 
   mutate(var = gsub(".*_", "", scenario_name)) %>% 
   rename(Einit = E_init, tinflect = t_inflect) %>% 
   {mutate(., var_val = apply(., 1, function(x) case_when(x["var"] == "baseline" ~ as.numeric(NA)
@@ -73,8 +80,10 @@ var_values <-
                                                          # , x["var"] == "tinflect" ~ "DATE"
                                                          , T ~ as.numeric(x[as.character(x["var"])]))))} %>% 
   left_join(baseline_values) %>% 
-  mutate(from = ifelse(var == "tinflect", as.Date(baseline, origin = "1970-01-01") %>% format("%d%b") %>% {gsub("^0", "", .)}, baseline)
-         , to = ifelse(var == "tinflect", as.Date(var_val, origin = "1970-01-01") %>% format("%d%b") %>% {gsub("^0", "", .)}, var_val)) %>% 
+  mutate(from = baseline
+         , to = var_val) %>%
+  # mutate(from = ifelse(var == "tinflect", as.Date(baseline, origin = "1970-01-01") %>% format("%d%b") %>% {gsub("^0", "", .)}, baseline)
+  #        , to = ifelse(var == "tinflect", as.Date(var_val, origin = "1970-01-01") %>% format("%d%b") %>% {gsub("^0", "", .)}, var_val)) %>%
   transmute(scenario = scenario_name, var, var_val, baseline
             , scenario_label =  ifelse(scenario == "baseline", "baseline", paste0(scenario, " (", from, "->", to, ")"))
             
@@ -181,7 +190,7 @@ for(e in e_vec){
 
 ggsave(plot = arrangeGrob(grobs = pl_list
                           , nrow = 1, widths = list(20, 12, 12, 12, 12))
-       , filename = "~/Pasteur/tars/output/Figs/sensAnal_ALL.png", units = "cm", width = 55, height = 25)
+       , filename = "~/tars/output/Figs/sensAnal_ALL_relative.png", units = "cm", width = 55, height = 25)
 
 
 

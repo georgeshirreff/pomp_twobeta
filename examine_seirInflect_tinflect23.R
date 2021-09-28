@@ -475,8 +475,10 @@ itable <- res %>%
             , AIC = mean(AIC)
   ) %>% 
   ungroup %>% 
-  mutate(across(contains("t_in"), function(x) gsub("^0", " ", format(x, "%d %b")))) %>% 
+  # mutate(across(contains("t_in"), function(x) gsub("^0", " ", format(x, "%d %b")))) %>% 
+  
   mutate_if(is.numeric, function(x) format(round(x, 2), nsmall = 2)) %>%
+  mutate(across(contains("t_in"), function(x) round(as.numeric(x - as.numeric(as.Date("2020-03-11")))))) %>% 
   # mutate_at(c("bestR0", "minR0", "maxR0", "bestEinit", "minEinit", "maxEinit"), function(x) format(round(x, 1), nsmall = 1)) %>%
   transmute(E_init
             , beta1 = paste0(bestbeta1, "\n(", minbeta1, "-", maxbeta1, ")")
@@ -495,7 +497,7 @@ itable <- res %>%
   ) %>% 
   mutate(E_init = as.numeric(E_init %>% trimws))
 
-itable %>% write_delim(paste0("~/tars/output/Figs/", "inflect_results_table_tinit", ".csv"), delim = ";")
+itable %>% write_csv(paste0("~/tars/output/Figs/", "inflect_results_table_tinit", "_relative.csv"))
 
 
 inflect_results_scatter_tinit = list()
@@ -530,6 +532,7 @@ inflect_results_scatter_tinit[["beta2"]] <- res %>%
   guides(alpha = F) 
 
 inflect_results_scatter_tinit[["t_init"]] <- res %>% 
+  mutate(across(contains("t_"), function(x) as.numeric(x - as.numeric(as.Date("2020-03-11"))))) %>% 
   ggplot(aes(x = t_init, y = loglik, alpha = ci)) + geom_point() + 
   geom_hline(aes(yintercept = ci_boundary), linetype = "dashed") + 
   facet_grid(~E_init, scales = "free_y") +
@@ -537,7 +540,7 @@ inflect_results_scatter_tinit[["t_init"]] <- res %>%
   coord_cartesian(ylim = c(-330, NA)
                   # , xlim = c(0, 2.5)
   ) + 
-  labs(x = expression(t[init]), y = "log Likelihood") + 
+  labs(x = expression(t[init]~relative), y = "log Likelihood") + 
   theme_bw() +
   theme(text = element_text(size = 20)
         , axis.text.x = element_text(angle = 90)
@@ -549,7 +552,7 @@ inflect_results_scatter_tinit[["t_init"]] <- res %>%
 
 
 ggsave(ggpubr::ggarrange(plotlist = inflect_results_scatter_tinit, ncol = 1)
-       , filename = paste0("~/tars/output/Figs/", "inflect_results_scatter_tinit", ".png")
+       , filename = paste0("~/tars/output/Figs/", "inflect_results_scatter_tinit", "_relative.png")
        , width = 20, height = 25, units = "cm")
 
 
@@ -640,8 +643,10 @@ tinf_table <- res %>%
             , AIC = mean(AIC)
   ) %>% 
   ungroup %>% 
-  mutate(across(contains("t_in"), function(x) gsub("^0", " ", format(x, "%d %b")))) %>% 
+  # mutate(across(contains("t_in"), function(x) gsub("^0", " ", format(x, "%d %b")))) %>% 
   mutate_if(is.numeric, function(x) format(round(x, 2), nsmall = 2)) %>%
+  mutate(across(contains("t_in"), function(x) round(as.numeric(x - as.numeric(as.Date("2020-03-11")))))) %>% 
+  
   # mutate_at(c("bestR0", "minR0", "maxR0", "bestEinit", "minEinit", "maxEinit"), function(x) format(round(x, 1), nsmall = 1)) %>%
   transmute(t_inflect
             , beta1 = paste0(bestbeta1, "\n(", minbeta1, "-", maxbeta1, ")")
@@ -660,7 +665,7 @@ tinf_table <- res %>%
             
   )
 
-tinf_table %>% write_delim(paste0("~/tars/output/Figs/", "inflect_results_table_tinflect", ".csv"), delim = ";")
+tinf_table %>% write_csv(paste0("~/tars/output/Figs/", "inflect_results_table_tinflect", "_relative.csv"))
 
 ##### t_inflect sim plots #####
 
@@ -798,7 +803,9 @@ res <- res %>%
   group_by(t_init, t_inflect) %>% 
   mutate(ci_boundary = max(loglik) - ci_interval
          , ci =  ifelse(loglik > max(loglik) - ci_interval, "in_ci", "out_ci")) %>% 
-  ungroup
+  ungroup %>% 
+  mutate(across(contains("t_in"), function(x) round(as.numeric(x - as.numeric(as.Date("2020-03-11"))))))
+  
   
 
 itable <- res %>%  
@@ -826,7 +833,7 @@ itable <- res %>%
             , AIC = mean(AIC)
   ) %>% 
   ungroup %>% 
-  mutate(across(contains("t_in"), function(x) gsub("^0", " ", format(x, "%d %b")))) %>% 
+  # mutate(across(contains("t_in"), function(x) gsub("^0", " ", format(x, "%d %b")))) %>% 
   mutate_if(is.numeric, function(x) format(round(x, 2), nsmall = 2)) %>%
   # mutate_at(c("bestR0", "minR0", "maxR0", "bestEinit", "minEinit", "maxEinit"), function(x) format(round(x, 1), nsmall = 1)) %>%
   transmute(t_init
@@ -845,7 +852,7 @@ itable <- res %>%
   mutate(E_init = gsub("^([ ]?[0-9]+)[.]0$", "\\1", E_init)) %>% 
   mutate(E_init = gsub("\\( ", "\\(", E_init))
 
-itable %>% write_delim(paste0("~/tars/output/Figs/", "inflect_results_table_Einit", ".csv"), delim = ";")
+itable %>% write_delim(paste0("~/tars/output/Figs/", "inflect_results_table_Einit", "_relative.csv"), delim = ";")
 
 
 
@@ -917,7 +924,7 @@ p_Einit <- res %>%
 
 
 ggsave(ggpubr::ggarrange(plotlist = list(p_beta1, p_beta2, p_Einit), ncol = 1)
-       , filename = paste0("~/tars/output/Figs/", "inflect_results_scatter_Einit", ".png")
+       , filename = paste0("~/tars/output/Figs/", "inflect_results_scatter_Einit", "_relative.png")
        , width = 20, height = 25, units = "cm")
 
 
@@ -1304,7 +1311,10 @@ obs_df %>%
                                         #                                       , "pSymptomatic\ndetected"
                                                                               
   ))) %>% 
-  ggplot(aes(x = as.Date(Date, origin = "1970-01-01"), y = Prevalence, fill = Fate, alpha = Fate)) + geom_area() + 
+  mutate(relDate = Date - as.numeric(as.Date("2020-03-11"))) %>% 
+  # transmute(Date, relDate, as.Date(Date, origin = "1970-01-01")) %>% print(n = 100)
+  # ggplot(aes(x = as.Date(Date, origin = "1970-01-01"), y = Prevalence, fill = Fate, alpha = Fate)) + geom_area() + 
+  ggplot(aes(x = relDate, y = Prevalence, fill = Fate, alpha = Fate)) + geom_area() + 
   scale_fill_manual(values = c(pAsymptomatic_undetected = "green"
                                , pSymptomatic_undetected = "blue"
                                , pAsymptomatic_detected = "green"
@@ -1313,7 +1323,7 @@ obs_df %>%
                                 , pSymptomatic_undetected = 0.3
                                 , pAsymptomatic_detected = 1
                                 , pSymptomatic_detected = 1)) + 
-  labs(x = "", y = "Prevalent cases", fill = "", alpha = "") +
+  labs(x = "relative date", y = "Prevalent cases", fill = "", alpha = "") +
   theme_bw() + theme(text = element_text(size = 20)
                      , legend.text = element_text(size = 10)
                      , legend.position = c(0.2, 0.80)
@@ -1328,9 +1338,10 @@ obs_df %>%
   # geom_text(label = expression(t[inflect]), x = as.Date("2020-03-23"), y = 160, size = 10)
 
 
-ggsave(paste0("~/tars/output/Figs/", "new_sims_inflection_detected", SAR_numer_threshold, ".pdf")
+# ggsave(paste0("~/tars/output/Figs/", "new_sims_inflection_detected", SAR_numer_threshold, ".pdf")
+ggsave(paste0("~/tars/output/Figs/", "new_sims_inflection_detected", SAR_numer_threshold, "_relative.tif")
        # , height = 15, width = 20, units = "cm"
-       , device = "pdf"
+       , device = "tiff"
        , height = 15*8.5/20, width = 8.5, units = "cm", scale = 20/8.5, dpi = 300
        )
 
@@ -1447,7 +1458,7 @@ obs_df %>%
                 , max = quantile(pos, 1)
 
       )) %>%
-  left_join(these_approved_sims %>% filter(rep == best_id) %>% transmute(Date, max_logLik = pos)) %>%
+  # left_join(these_approved_sims %>% filter(rep == best_id) %>% transmute(Date, max_logLik = pos)) %>%
   # left_join(mode_curve) %>%
   ggplot(aes(x = as.Date(Date, origin = "1970-01-01"))) +
 

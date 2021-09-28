@@ -2,7 +2,8 @@ library(readxl)
 library(ggplot2)
 library(tidyverse)
 library(magrittr)
-source('~/pomp_twobeta/sim_plot_wards.R')
+# source('~/pomp_twobeta/sim_plot_wards.R')
+source('~/pomp_twobeta/sim_plot_wards_relative.R')
 Sys.setlocale("LC_TIME", "English")
 
 
@@ -127,6 +128,7 @@ res_ward_inflect %>%
 ggsave(paste0("~/tars/output/Wards/", exp_name, "_tinflect.png"), units = "cm", width = 30, height = 20)
 
 inflect_wtable <- res_ward_inflect %>%  
+  filter(wardCode %in% c("A2", "C0", "C2", "C3")) %>% 
   group_by(wardCode, E_init) %>% 
   mutate(ci_boundary = max(loglik) - ci_interval
          , ci =  ifelse(loglik > max(loglik) - ci_interval, "in_ci", "out_ci")
@@ -161,8 +163,10 @@ inflect_wtable <- res_ward_inflect %>%
             , AIC = mean(AIC)
   ) %>% 
   ungroup %>% 
-  mutate(across(contains("t_in"), function(x) gsub("^0", " ", format(x, "%d %b")))) %>% 
+  # mutate(across(contains("t_in"), function(x) gsub("^0", " ", format(x, "%d %b")))) %>% 
   mutate_if(is.numeric, function(x) format(round(x, 2), nsmall = 2)) %>%
+  mutate(across(contains("t_in"), function(x) round(as.numeric(x - as.numeric(as.Date("2020-03-11")))))) %>% 
+  
   # mutate_at(c("bestR0", "minR0", "maxR0", "bestEinit", "minEinit", "maxEinit"), function(x) format(round(x, 1), nsmall = 1)) %>%
   transmute(wardCode
             , E_init
@@ -184,7 +188,7 @@ inflect_wtable <- res_ward_inflect %>%
   ) %>% 
   mutate(E_init = as.numeric(E_init %>% trimws))
 
-inflect_wtable %>% write_delim(paste0("~/tars/output/Wards/", exp_name, "_wtable.csv"), delim = ";")
+inflect_wtable %>% write_csv(paste0("~/tars/output/Wards/", exp_name, "_wtable_relative.csv"))
 
 #####
 
@@ -230,12 +234,15 @@ ward_sim_plot3 <- pomp_sim_plot(res_ward = res_ward_refresh
                                 , detection_plot = F
                                 , calculate_logLik = F)
 
+
 ggsave(ward_sim_plot, filename = paste0("~/tars/output/Wards/", exp_name, "_simplot0.png"), units = "cm", width = 40, height = 20)
 ggsave(ward_sim_plot3 + theme(axis.text.x = element_text(angle = 0)), filename = paste0("~/tars/output/Wards/", exp_name, "_simplot3.pdf")
        # , units = "cm", width = 40, height = 20
        , device = "pdf"
        , height = 8.5, width = 17, units = "cm", scale = 40/17, dpi = 300
        )
+
+
 
 ward_sim_prev_plot0 <- pomp_sim_plot(res_ward = res_ward_refresh
                                      , pompModel_source = "~/R code/seirRefresh_source_ward.R"
@@ -253,11 +260,42 @@ ward_sim_prev_plot3 <- pomp_sim_plot(res_ward = res_ward_refresh
                                      , detection_plot = T
                                      , calculate_logLik = F)
 
+
 ggsave(ward_sim_prev_plot3, filename = paste0("~/tars/output/Wards/", exp_name, "_simprevplot3.pdf")
        # , units = "cm", width = 40, height = 20
        , device = "pdf"
        , height = 8.5, width = 17, units = "cm", scale = 40/17, dpi = 300
        )
+
+####
+
+ward_sim_plot3_relative <- pomp_sim_plot_relative(res_ward = res_ward_refresh
+                                                  , pompModel_source = "~/R code/seirRefresh_source_ward.R"
+                                                  , NSIM = 1000
+                                                  , SAR_numer_threshold = 3
+                                                  , detection_plot = F
+                                                  , calculate_logLik = F)
+
+ggsave(ward_sim_plot3_relative + theme(axis.text.x = element_text(angle = 0)), filename = paste0("~/tars/output/Wards/", exp_name, "_simplot3_relative.tif")
+       # , units = "cm", width = 40, height = 20
+       , device = "tiff"
+       , height = 8.5, width = 17, units = "cm", scale = 40/17, dpi = 300
+)
+
+ward_sim_prev_plot3_relative <- pomp_sim_plot_relative(res_ward = res_ward_refresh
+                                                       , pompModel_source = "~/R code/seirRefresh_source_ward.R"
+                                                       , NSIM = 1000
+                                                       , SAR_numer_threshold = 3
+                                                       , detection_plot = T
+                                                       , calculate_logLik = F)
+
+ggsave(ward_sim_prev_plot3_relative, filename = paste0("~/tars/output/Wards/", exp_name, "_simprevplot3_relative.tif")
+       # , units = "cm", width = 40, height = 20
+       , device = "tiff"
+       , height = 8.5, width = 17, units = "cm", scale = 40/17, dpi = 300
+)
+
+
 
 
 res_ward_refresh %>%
@@ -281,13 +319,15 @@ res_ward_refresh %>%
 ggsave(paste0("~/tars/output/Wards/", exp_name, "_beta.png"), units = "cm", width = 15, height = 20)
 
 res_ward_refresh %>%
+  mutate(across(contains("t_in"), function(x) round(as.numeric(x - as.numeric(as.Date("2020-03-11")))))) %>% 
+  
   group_by(wardCode) %>% 
   ggplot(aes(x = t_init, y = loglik, alpha = ci, colour = wardCode)) + geom_point() + 
   geom_hline(aes(yintercept = ci_boundary, colour = wardCode), linetype = "dashed") + 
   facet_wrap(~wardCode, scales = "free_y") +
   scale_alpha_manual(values = c(in_ci = 0.5, out_ci = 0.01)) + 
   # scale_x_continuous(breaks = seq(0, 2, by = 0.5), minor_breaks = seq(0, 10, by = 0.1)) + 
-  labs(x = expression(t[init]), y = "log Likelihood", alpha = "") +
+  labs(x = expression(t[init]~relative), y = "log Likelihood", alpha = "") +
   theme_bw() +
   theme(text = element_text(size = 20)
         , axis.text.x = element_text(angle = 90)
@@ -299,9 +339,9 @@ res_ward_refresh %>%
 
 # ggsave("~/tars/output/Wards/refresh_tinit.png", units = "cm", width = 30, height = 20)
 
-ggsave(paste0("~/tars/output/Wards/", exp_name, "_tinit.png"), units = "cm", width = 15, height = 20)
+ggsave(paste0("~/tars/output/Wards/", exp_name, "_tinit_relative.png"), units = "cm", width = 15, height = 20)
 
-refresh_wtable <- res_ward_refresh %>%  
+refresh_wtable <- res_ward_refresh %>% 
   group_by(wardCode, E_init) %>% 
   mutate(ci_boundary = max(loglik) - ci_interval
          , ci =  ifelse(loglik > max(loglik) - ci_interval, "in_ci", "out_ci")
@@ -320,8 +360,9 @@ refresh_wtable <- res_ward_refresh %>%
             , AIC = mean(AIC)
   ) %>% 
   ungroup %>% 
-  mutate(across(contains("t_in"), function(x) gsub("^0", " ", format(x, "%d %b")))) %>% 
+  # mutate(across(contains("t_in"), function(x) gsub("^0", " ", format(x, "%d %b")))) %>% 
   mutate_if(is.numeric, function(x) format(round(x, 2), nsmall = 2)) %>%
+  mutate(across(contains("t_in"), function(x) round(as.numeric(x - as.numeric(as.Date("2020-03-11")))))) %>% 
   # mutate_at(c("bestR0", "minR0", "maxR0", "bestEinit", "minEinit", "maxEinit"), function(x) format(round(x, 1), nsmall = 1)) %>%
   transmute(wardCode
             , E_init
@@ -336,7 +377,7 @@ refresh_wtable <- res_ward_refresh %>%
   mutate(E_init = as.numeric(E_init %>% trimws))
 
 # refresh_wtable %>% write_csv(paste0("~/tars/output/Wards/", exp_name, "_wtable.csv"))
-refresh_wtable %>% write_delim(paste0("~/tars/output/Wards/", exp_name, "_wtable.csv"), delim = ";")
+refresh_wtable %>% write_csv(paste0("~/tars/output/Wards/", exp_name, "_wtable_relative.csv"))
 
 
 

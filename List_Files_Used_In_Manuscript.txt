@@ -24,6 +24,8 @@ Final analyses
 		validation_table_3param_tinit_tinflect23.csv
 		seirInflect_valid3param.R
 		parallel_validate3param_tinit_seirInflect.sh
+		
+		bias_test_inflect.R
 	
 	Sensitivity analysis
 		sensAnalysis_scenarios_v5.xlsx
@@ -35,15 +37,22 @@ Final analyses
 Processing
 	examine_seirInflect_tinflect23.R
 	bias_test_refresh.R
+	bias_test_inflect.R
 
 
 Visualisations
 	Whole hospital	
 		examine_seirInflect_tinflect23.R
 		compare_one_two_model_fits.R
+		Scatterplots
+			gather_posneg_tars_2d_relative.R
 	Wards
 		compare_ward_models.R
 		sim_plot_wards.R
+		sim_plot_wards_relative.R
+	Validation
+		bias_test_refresh.R
+		bias_test_inflect.R
 	Sens analysis 
 		ward_growth_sensAnal_plots.R
 	Additional

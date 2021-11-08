@@ -50,10 +50,12 @@ Visualisations
 		compare_ward_models.R
 		sim_plot_wards.R
 		sim_plot_wards_relative.R
+		gather_bias_tests_ALLward.R
 	Validation
 		bias_test_refresh.R
 		bias_test_inflect.R
 	Sens analysis 
 		ward_growth_sensAnal_plots.R
+		sensAnal_plots_v2.R
 	Additional
 		illustrate_inflection_model.R

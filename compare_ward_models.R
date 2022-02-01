@@ -2,6 +2,8 @@ library(readxl)
 library(ggplot2)
 library(tidyverse)
 library(magrittr)
+library(gridExtra)
+
 # source('~/pomp_twobeta/sim_plot_wards.R')
 source('~/pomp_twobeta/sim_plot_wards_relative.R')
 Sys.setlocale("LC_TIME", "English")
@@ -275,6 +277,16 @@ ward_sim_plot3_relative <- pomp_sim_plot_relative(res_ward = res_ward_refresh
                                                   , SAR_numer_threshold = 3
                                                   , detection_plot = F
                                                   , calculate_logLik = F)
+ward_sim_plot3_relative_list = list()
+for(wC in res_ward_refresh$wardCode %>% unique){
+  ward_sim_plot3_relative_list[[wC]] <- pomp_sim_plot_relative(res_ward = res_ward_refresh %>% filter(wC == wardCode)
+                                                    , pompModel_source = "~/R code/seirRefresh_source_ward.R"
+                                                    , NSIM = 1000
+                                                    , SAR_numer_threshold = 3
+                                                    , detection_plot = F
+                                                    , calculate_logLik = F)
+  
+}
 
 ggsave(ward_sim_plot3_relative + theme(axis.text.x = element_text(angle = 0)), filename = paste0("~/tars/output/Wards/", exp_name, "_simplot3_relative.tif")
        # , units = "cm", width = 40, height = 20
@@ -282,6 +294,8 @@ ggsave(ward_sim_plot3_relative + theme(axis.text.x = element_text(angle = 0)), f
        , height = 8.5, width = 17, units = "cm", scale = 40/17, dpi = 300
 )
 
+pomp_sim_distribution
+set.seed(1)
 ward_sim_prev_plot3_relative <- pomp_sim_plot_relative(res_ward = res_ward_refresh
                                                        , pompModel_source = "~/R code/seirRefresh_source_ward.R"
                                                        , NSIM = 1000
@@ -289,12 +303,145 @@ ward_sim_prev_plot3_relative <- pomp_sim_plot_relative(res_ward = res_ward_refre
                                                        , detection_plot = T
                                                        , calculate_logLik = F)
 
+ward_sim_prev_plot3_relative_list = list()
+for(wC in res_ward_refresh$wardCode %>% unique){
+  ward_sim_prev_plot3_relative_list[[wC]] <- pomp_sim_plot_relative(res_ward = res_ward_refresh %>% filter(wC == wardCode)
+                                                               , pompModel_source = "~/R code/seirRefresh_source_ward.R"
+                                                               , NSIM = 1000
+                                                               , SAR_numer_threshold = 3
+                                                               , detection_plot = T
+                                                               , calculate_logLik = F)
+  
+}
+
+
 ggsave(ward_sim_prev_plot3_relative, filename = paste0("~/tars/output/Wards/", exp_name, "_simprevplot3_relative.tif")
        # , units = "cm", width = 40, height = 20
        , device = "tiff"
        , height = 8.5, width = 17, units = "cm", scale = 40/17, dpi = 300
 )
 
+
+ggsave(arrangeGrob(grobs = list(sim_prev_plot3_relative
+                                , ward_sim_prev_plot3_relative + theme(axis.title.y = element_blank()
+                                                                       , legend.position = "none")
+                                ), ncol = 2, widths = c(30, 30))
+       , filename = paste0("~/tars/output/Figs/whole_ward_simprevplot3_relative.tif")
+       # , units = "cm", width = 40, height = 20
+       , device = "tiff"
+       , height = 8.5, width = 17, units = "cm", scale = 40/17, dpi = 600
+)
+
+ggsave(arrangeGrob(grobs = list(basic_sims_relative + ggtitle("Whole hospital")
+                                , ward_sim_plot3_relative + theme(axis.title.y = element_blank()
+                                                                       , legend.position = "none") + 
+                                  ggtitle("One-phase model")
+), ncol = 1, heights = c(20, 20))
+, filename = paste0("~/tars/output/Figs/whole_ward_simplot3_relative.tif")
+# , units = "cm", width = 40, height = 20
+, device = "tiff"
+, height = 17, width = 17, units = "cm", scale = 40/17, dpi = 600
+)
+
+
+
+one_phase_sims
+two_phase_sims
+fig_scale = 2
+
+ggsave(one_phase_sims + theme(legend.position = c(0.2, 0.8))
+       # , filename = paste0("~/tars/output/Figs/Fig3A.tif")
+       # , filename = paste0("~/../Dropbox/Covid modelling/EID/Figures/Fig3A.tif")
+       , filename = paste0("~/../Dropbox/Covid modelling/EID/Figures/Fig3A.jpg")
+       # , units = "cm", width = 40, height = 20
+       , device = "jpeg"
+       , height = 7/7, width = 7/7, units = "cm", scale = fig_scale*7, dpi = 600
+)
+ggsave(two_phase_sims + theme(legend.position = "none")
+       # , filename = paste0("~/tars/output/Figs/Fig3B.tif")
+       # , filename = paste0("~/../Dropbox/Covid modelling/EID/Figures/Fig3B.tif")
+       , filename = paste0("~/../Dropbox/Covid modelling/EID/Figures/Fig3B.jpg")
+       # , units = "cm", width = 40, height = 20
+       , device = "jpeg"
+       , height = 7, width = 7, units = "cm", scale = fig_scale, dpi = 600
+)
+ggsave(ward_sim_plot3_relative + theme(legend.position = "none")
+       # , filename = paste0("~/tars/output/Figs/Fig3C.tif")
+       # , filename = paste0("~/../Dropbox/Covid modelling/EID/Figures/Fig3C.tif")
+       , filename = paste0("~/../Dropbox/Covid modelling/EID/Figures/Fig3C_multi.jpg")
+       # , units = "cm", width = 40, height = 20
+       , device = "jpeg"
+       , height = 7, width = 10, units = "cm", scale = 3, dpi = 600
+)
+
+ggsave(ward_sim_plot3_relative_list[["A2"]] + theme(legend.position = "none")
+       , filename = paste0("~/../Dropbox/Covid modelling/EID/Figures/Fig3C.jpg")
+       , device = "jpeg"
+       , height = 7, width = 7, units = "cm", scale = fig_scale, dpi = 600
+)
+ggsave(ward_sim_plot3_relative_list[["C0"]] + theme(legend.position = "none")
+       , filename = paste0("~/../Dropbox/Covid modelling/EID/Figures/Fig3D.jpg")
+       , device = "jpeg"
+       , height = 7, width = 7, units = "cm", scale = fig_scale, dpi = 600
+)
+ggsave(ward_sim_plot3_relative_list[["C2"]] + theme(legend.position = "none")
+       , filename = paste0("~/../Dropbox/Covid modelling/EID/Figures/Fig3E.jpg")
+       , device = "jpeg"
+       , height = 7, width = 7, units = "cm", scale = fig_scale, dpi = 600
+)
+ggsave(ward_sim_plot3_relative_list[["C3"]] + theme(legend.position = "none")
+       , filename = paste0("~/../Dropbox/Covid modelling/EID/Figures/Fig3F.jpg")
+       , device = "jpeg"
+       , height = 7, width = 7, units = "cm", scale = fig_scale, dpi = 600
+)
+
+
+
+
+ggsave(sim_prev_plot3_relative
+       # , filename = paste0("~/tars/output/Figs/Fig4A.tif")
+       # , filename = paste0("~/../Dropbox/Covid modelling/EID/Figures/Fig4A.tif")
+       , filename = paste0("~/../Dropbox/Covid modelling/EID/Figures/Fig4A.jpg")
+       # , units = "cm", width = 40, height = 20
+       , device = "jpeg"
+       , height = 7, width = 7, units = "cm", scale = fig_scale, dpi = 600
+)
+ggsave(ward_sim_prev_plot3_relative + theme(legend.position = "none") + theme(legend.position = "none")
+       # , filename = paste0("~/tars/output/Figs/Fig4B.tif")
+       # , filename = paste0("~/../Dropbox/Covid modelling/EID/Figures/Fig4B.tif")
+       , filename = paste0("~/../Dropbox/Covid modelling/EID/Figures/Fig4B_multi.jpg")
+       # , units = "cm", width = 40, height = 20
+       , device = "jpeg"
+       , height = 7, width = 10, units = "cm", scale = 3, dpi = 600
+)
+
+ggsave(ward_sim_prev_plot3_relative_list[["A2"]] + theme(legend.position = "none")
+       , filename = paste0("~/../Dropbox/Covid modelling/EID/Figures/Fig4B.jpg")
+       , device = "jpeg"
+       , height = 7, width = 7, units = "cm", scale = fig_scale, dpi = 600
+)
+ggsave(ward_sim_prev_plot3_relative_list[["C0"]] + theme(legend.position = "none")
+       , filename = paste0("~/../Dropbox/Covid modelling/EID/Figures/Fig4C.jpg")
+       , device = "jpeg"
+       , height = 7, width = 7, units = "cm", scale = fig_scale, dpi = 600
+)
+ggsave(ward_sim_prev_plot3_relative_list[["C2"]] + theme(legend.position = "none")
+       , filename = paste0("~/../Dropbox/Covid modelling/EID/Figures/Fig4D.jpg")
+       , device = "jpeg"
+       , height = 7, width = 7, units = "cm", scale = fig_scale, dpi = 600
+)
+ggsave(ward_sim_prev_plot3_relative_list[["C3"]] + theme(legend.position = "none")
+       , filename = paste0("~/../Dropbox/Covid modelling/EID/Figures/Fig4E.jpg")
+       , device = "jpeg"
+       , height = 7, width = 7, units = "cm", scale = fig_scale, dpi = 600
+)
+
+# ward_sim_prev_plot2_relative <- pomp_sim_plot_relative(res_ward = res_ward_refresh
+#                                                        , pompModel_source = "~/R code/seirRefresh_source_ward.R"
+#                                                        , NSIM = 1000
+#                                                        , SAR_numer_threshold = 2
+#                                                        , detection_plot = T
+#                                                        , calculate_logLik = F)
 
 
 

@@ -263,9 +263,9 @@ for(e in c("beta1", "beta2"
     labs(title = "", colour = "", x = true_labels[e], y = est_labels[e])  + 
     coord_cartesian(ylim = upper_limits[[e]]) +
     guides(color = F) + 
-    theme_bw() + 
-    theme(text = element_text(size = 20), legend.position = c(0.2, 0.8)
-          , legend.background = element_rect(fill="white", linetype="solid"))
+    theme_bw() #+ 
+    # theme(text = element_text(size = 20), legend.position = c(0.2, 0.8)
+    #       , legend.background = element_rect(fill="white", linetype="solid"))
   
 }
 
@@ -276,6 +276,14 @@ ggpubr::ggarrange(plotlist = pls, ncol = 3)
 # ggsave(paste0("~/tars/output/Figs/", "validation_", experiment_name, ".png"), units = "cm", width = 30, height = 12)
 
 ggsave(paste0("~/tars/output/Figs/", "validation_", experiment_name, "_relative.png"), units = "cm", width = 30, height = 12)
+
+ggsave(pls[["beta1"]]
+       , filename = paste0("~/tars/output/Figs/", "SFig5A.jpg"), units = "cm", width = 7, height = 7, device = "jpeg", dpi = 600)
+ggsave(pls[["beta2"]]
+       , filename = paste0("~/tars/output/Figs/", "SFig5B.jpg"), units = "cm", width = 7, height = 7, device = "jpeg", dpi = 600)
+ggsave(pls[["t_init"]]
+       , filename = paste0("~/tars/output/Figs/", "SFig5C.jpg"), units = "cm", width = 7, height = 7, device = "jpeg", dpi = 600)
+
 
 
 experiment_name = "posneg Inflect valid3param beta2"

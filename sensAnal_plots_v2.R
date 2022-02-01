@@ -28,7 +28,7 @@ sa_scen <- read_csv("~/tars/input/sensAnalysis/sensAnalysis_scenarios_v5.csv") %
   mutate(t_inflect = as.numeric(t_inflect))
 # sa_scen <- read_csv("~/Pasteur/tars/input/sensAnalysis/sensAnalysis_scenarios_v4.csv")
 
-sa_scen %>% View
+# sa_scen %>% View
 
 sA <- sA %>% 
   left_join(sa_scen %>% select(-beta1, -beta2, -t_init) %>% 
@@ -173,7 +173,7 @@ for(e in e_vec){
     guides(colour = F)+
     theme(panel.grid.major.y = element_blank()
           , axis.text.y = eval(parse(text = ifelse(e == "beta1", "element_text()", "element_blank()")))
-          , text = element_text(size=20)) 
+          , text = element_text(size=10)) 
   
   # ggsave(paste0("~/Pasteur/tars/output/Figs/"
   #               , "sensAnal_", e
@@ -192,6 +192,10 @@ ggsave(plot = arrangeGrob(grobs = pl_list
                           , nrow = 1, widths = list(20, 12, 12, 12, 12))
        , filename = "~/tars/output/Figs/sensAnal_ALL_relative.png", units = "cm", width = 55, height = 25)
 
+
+ggsave(plot = arrangeGrob(grobs = pl_list
+                          , nrow = 1, widths = list(20, 12, 12, 12, 12))
+       , filename = "~/tars/output/Figs/SFig8.jpeg", units = "cm", width = 30, height = 15, device = "jpeg", dpi = 300)
 
 
 # ggsave(paste0("~/Pasteur/tars/output/Figs/", "bE_Einit_sensAnal", ".png")

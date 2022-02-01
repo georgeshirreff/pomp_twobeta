@@ -186,6 +186,7 @@ pomp_sim_plot_relative <- function(res_ward, pompModel_source, NSIM = 10, SAR_nu
     sim_plot = sim_distribution_df %>% 
       filter(Date > as.Date("2020-03-01")) %>% 
       pivot_longer(contains("detected"), values_to = "Prevalence", names_to = c("Fate")) %>% 
+      mutate(wardCode_label = paste("ward", wardCode)) %>% 
       # mutate(Fate = gsub("_", "\n", Fate)) %>% 
       mutate(Fate = factor(Fate, levels = c("pAsymptomatic_undetected"
                                             , "pSymptomatic_undetected"
@@ -212,13 +213,16 @@ pomp_sim_plot_relative <- function(res_ward, pompModel_source, NSIM = 10, SAR_nu
                          # , colour = "black"
       ) + 
       # scale_y_continuous(labels = function(x) scales::percent(x = x, accuracy = 1)) + 
-      facet_wrap(.~wardCode, scales = "free_y")
+      # facet_wrap(.~wardCode, scales = "free_y")
+      facet_wrap(.~wardCode_label, scales = "free_y")
       
   }
   else if(!calculate_logLik){
     sim_plot = sim_distribution_df %>% 
       filter(Date > as.Date("2020-03-01")) %>% 
       mutate(relDate = Date - as.numeric(as.Date("2020-03-11"))) %>% 
+      mutate(wardCode_label = paste("ward", wardCode)) %>% 
+      
       ggplot(aes(x = relDate)) + 
       # ggplot(aes(x = as.Date(Date, origin = "1970-01-01"))) + 
       # geom_bar(aes(y = Data, fill = "Data"), stat = "identity") + 
@@ -228,7 +232,7 @@ pomp_sim_plot_relative <- function(res_ward, pompModel_source, NSIM = 10, SAR_nu
       geom_line(aes(y = median, colour = "median", size = "median", linetype = "median")) +
       geom_point(aes(y = Data, colour = "Data", size = "Data", linetype = "Data")) + 
       scale_colour_manual(values = c(  Data = "red"   , median = "black" , mode = "blue", CI = "grey")) +
-      scale_linetype_manual(values = c(Data = "blank", median = "dashed", mode = "dotted", CI = "solid")) +
+      scale_linetype_manual(values = c(Data = "blank", median = "solid", mode = "dotted", CI = "solid")) +
       scale_size_manual(values = c(    Data = 2       , median = 1, mode = 1       , CI = 1)) +
       labs(x = "relative date", y = "Positive tests", linetype = "Simulations", size = "Simulations", colour = "Simulations") + 
       theme_bw() + theme(text = element_text(size = 20)
@@ -238,11 +242,14 @@ pomp_sim_plot_relative <- function(res_ward, pompModel_source, NSIM = 10, SAR_nu
                          , axis.text.x = element_text(angle = 90)
                          
       ) + 
-      facet_wrap(.~wardCode, scales = "free_y")
+      # facet_wrap(.~wardCode, scales = "free_y")
+      facet_wrap(.~wardCode_label, scales = "free_y")
+    
   } else {
     sim_plot = sim_distribution_df %>% 
       filter(Date > as.Date("2020-03-01")) %>% 
       mutate(relDate = Date - as.numeric(as.Date("2020-03-11"))) %>% 
+      mutate(wardCode_label = paste("ward", wardCode)) %>% 
       
       ggplot(aes(x = relDate)) + 
       # ggplot(aes(x = as.Date(Date, origin = "1970-01-01"))) + 
@@ -254,7 +261,7 @@ pomp_sim_plot_relative <- function(res_ward, pompModel_source, NSIM = 10, SAR_nu
       # geom_line(aes(y = median, colour = "median", size = "median", linetype = "median")) +
       geom_point(aes(y = Data, colour = "Data", size = "Data", linetype = "Data")) + 
       scale_colour_manual(values = c(  Data = "red"   , bestFit = "blue", median = "black" , mode = "blue", CI = "grey")) +
-      scale_linetype_manual(values = c(Data = "blank", bestFit = "dashed", median = "dashed", mode = "dotted", CI = "solid")) +
+      scale_linetype_manual(values = c(Data = "blank", bestFit = "solid", median = "solid", mode = "dotted", CI = "solid")) +
       scale_size_manual(values = c(    Data = 2       , bestFit = 1, median = 1, mode = 1       , CI = 1)) +
       labs(x = "relative date", y = "Positive tests", linetype = "Simulations", size = "Simulations", colour = "Simulations") + 
       theme_bw() + theme(text = element_text(size = 20)
@@ -264,7 +271,9 @@ pomp_sim_plot_relative <- function(res_ward, pompModel_source, NSIM = 10, SAR_nu
                          , axis.text.x = element_text(angle = 90)
                          
       ) + 
-      facet_wrap(.~wardCode, scales = "free_y")    
+      # facet_wrap(.~wardCode, scales = "free_y")   
+      facet_wrap(.~wardCode_label, scales = "free_y")
+    
   }
 
   

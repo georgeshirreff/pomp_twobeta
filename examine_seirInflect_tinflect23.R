@@ -1288,7 +1288,7 @@ SAR_numer_threshold = 3
 
 
 
-obs_df %>%
+sim_prev_plot3_relative <- obs_df %>%
   transmute(Date, Data = pos) %>%
   filter(Date >= as.Date("2020-03-01")) %>%
   left_join(
@@ -1300,33 +1300,49 @@ obs_df %>%
   ) %>% 
   # pivot_longer(-c("Date", "Data"), names_sep = "_", values_to = "Patients", names_to = c("Disease", "Detected")) %>% 
   pivot_longer(contains("detected"), values_to = "Prevalence", names_to = c("Fate")) %>% 
+  mutate(Fate = gsub("^p", "prev. ", Fate)) %>% 
+  mutate(Fate = gsub("_", "\n", Fate)) %>% 
   # mutate(Fate = gsub("_", "\n", Fate)) %>% 
-  mutate(Fate = factor(Fate, levels = c("pAsymptomatic_undetected"
-                                        , "pSymptomatic_undetected"
-                                        , "pAsymptomatic_detected"
-                                        , "pSymptomatic_detected"
+  mutate(Fate = factor(Fate, levels = c("prev. Asymptomatic\nundetected"
+                                        , "prev. Symptomatic\nundetected"
+                                        , "prev. Asymptomatic\ndetected"
+                                        , "prev. Symptomatic\ndetected"))) %>% 
+  # mutate(Fate = factor(Fate, levels = c("pAsymptomatic_undetected"
+  #                                       , "pSymptomatic_undetected"
+  #                                       , "pAsymptomatic_detected"
+  #                                       , "pSymptomatic_detected"
                                         # mutate(Fate = factor(Fate, levels = c("pAsymptomatic\nundetected"
                                         #                                       , "pSymptomatic\nundetected"
                                         #                                       , "pAsymptomatic\ndetected"
                                         #                                       , "pSymptomatic\ndetected"
                                                                               
-  ))) %>% 
+  # ))) %>% 
   mutate(relDate = Date - as.numeric(as.Date("2020-03-11"))) %>% 
+  # mutate(lab = "Whole hospital") %>% 
   # transmute(Date, relDate, as.Date(Date, origin = "1970-01-01")) %>% print(n = 100)
   # ggplot(aes(x = as.Date(Date, origin = "1970-01-01"), y = Prevalence, fill = Fate, alpha = Fate)) + geom_area() + 
   ggplot(aes(x = relDate, y = Prevalence, fill = Fate, alpha = Fate)) + geom_area() + 
-  scale_fill_manual(values = c(pAsymptomatic_undetected = "green"
-                               , pSymptomatic_undetected = "blue"
-                               , pAsymptomatic_detected = "green"
-                               , pSymptomatic_detected = "blue")) +
-  scale_alpha_manual(values = c(pAsymptomatic_undetected = 0.3
-                                , pSymptomatic_undetected = 0.3
-                                , pAsymptomatic_detected = 1
-                                , pSymptomatic_detected = 1)) + 
+  # facet_grid(.~lab) + 
+  # scale_fill_manual(values = c(pAsymptomatic_undetected = "green"
+  #                              , pSymptomatic_undetected = "blue"
+  #                              , pAsymptomatic_detected = "green"
+  #                              , pSymptomatic_detected = "blue")) +
+  # scale_alpha_manual(values = c(pAsymptomatic_undetected = 0.3
+  #                               , pSymptomatic_undetected = 0.3
+  #                               , pAsymptomatic_detected = 1
+  #                               , pSymptomatic_detected = 1)) + 
+  scale_fill_manual(values = c(`prev. Asymptomatic\nundetected` = "green"
+                               , `prev. Symptomatic\nundetected` = "blue"
+                               , `prev. Asymptomatic\ndetected` = "green"
+                               , `prev. Symptomatic\ndetected` = "blue")) + 
+  scale_alpha_manual(values = c(`prev. Asymptomatic\nundetected` = 0.3
+                                , `prev. Symptomatic\nundetected` = 0.3
+                                , `prev. Asymptomatic\ndetected` = 1
+                                , `prev. Symptomatic\ndetected` = 1)) + 
   labs(x = "relative date", y = "Prevalent cases", fill = "", alpha = "") +
   theme_bw() + theme(text = element_text(size = 20)
                      , legend.text = element_text(size = 10)
-                     , legend.position = c(0.2, 0.80)
+                     , legend.position = c(0.8, 0.9)
                        , legend.background = element_rect(fill=NA)
                                                         # size=0.5, linetype="solid"
                                                         # , colour = "black"
@@ -1337,6 +1353,7 @@ obs_df %>%
   #              , y = 150, yend = 130, arrow = arrow(length = unit(0.1, "inches"), ends = "last")) +
   # geom_text(label = expression(t[inflect]), x = as.Date("2020-03-23"), y = 160, size = 10)
 
+sim_prev_plot3_relative
 
 # ggsave(paste0("~/tars/output/Figs/", "new_sims_inflection_detected", SAR_numer_threshold, ".pdf")
 ggsave(paste0("~/tars/output/Figs/", "new_sims_inflection_detected", SAR_numer_threshold, "_relative.tif")

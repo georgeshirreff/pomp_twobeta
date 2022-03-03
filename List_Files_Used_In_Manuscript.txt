@@ -44,6 +44,7 @@ Visualisations
 	Whole hospital	
 		examine_seirInflect_tinflect23.R
 		compare_one_two_model_fits.R
+		create_simulated_curves.R
 		Scatterplots
 			gather_posneg_tars_2d_relative.R
 	Wards
